@@ -1,8 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-export const config = {
-  runtime: 'edge',
-};
+import { createClient } from '@supabase/supabase-js';
 
 // Conectar a Supabase desde el servidor (seguro)
 function getSupabase() {
@@ -17,7 +13,7 @@ function extractFolios(messages) {
   const folios = [];
   for (const msg of messages) {
     if (msg.role === 'user') {
-      const matches = msg.content.match(/GPL-\d{4}/gi);
+      const matches = msg.content.match(/GPL-\d{3,5}/gi);
       if (matches) folios.push(...matches.map(f => f.toUpperCase()));
     }
   }
@@ -55,10 +51,9 @@ function buildShipmentContext(quotes) {
     if (q.eta) context += `\nETA: ${q.eta}`;
     if (q.final_price && q.status !== 'PENDIENTE') context += `\nTarifa: $${q.final_price} MXN`;
     
-    // Bitácora de rastreo
     if (q.tracking_history && q.tracking_history.length > 0) {
       context += `\nÚltimas actualizaciones:`;
-      const recent = q.tracking_history.slice(0, 5); // Solo las 5 más recientes
+      const recent = q.tracking_history.slice(0, 5);
       for (const ev of recent) {
         const date = new Date(ev.timestamp).toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
         context += `\n  - ${date}: ${ev.message}${ev.location ? ' (📍 ' + ev.location + ')' : ''}`;
@@ -71,35 +66,35 @@ function buildShipmentContext(quotes) {
   return context;
 }
 
-export default async function handler(req) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Método no permitido' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(405).json({ error: 'Método no permitido' });
   }
 
   try {
-    const body = await req.json();
-    const userMessages = body.messages || [];
+    const { messages: userMessages = [] } = req.body;
 
     // Buscar si el usuario mencionó algún folio
     const folios = extractFolios(userMessages);
     let shipmentContext = '';
 
     if (folios.length > 0) {
-      const supabase = getSupabase();
-      if (supabase) {
-        const { data } = await supabase
-          .from('quotes')
-          .select('*')
-          .in('id', folios);
-        
-        if (data && data.length > 0) {
-          shipmentContext = buildShipmentContext(data);
-        } else {
-          shipmentContext = `\n\n--- No se encontraron embarques con los folios: ${folios.join(', ')}. Dile al cliente que verifique su número de folio. ---\n`;
+      try {
+        const supabase = getSupabase();
+        if (supabase) {
+          const { data } = await supabase
+            .from('quotes')
+            .select('*')
+            .in('id', folios);
+          
+          if (data && data.length > 0) {
+            shipmentContext = buildShipmentContext(data);
+          } else {
+            shipmentContext = `\n\n--- No se encontraron embarques con los folios: ${folios.join(', ')}. Dile al cliente que verifique su número de folio. ---\n`;
+          }
         }
+      } catch (dbErr) {
+        console.error('Supabase error:', dbErr);
       }
     }
 
@@ -138,10 +133,7 @@ ${shipmentContext}`,
     const apiKey = process.env.NVIDIA_API_KEY;
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'Falta la API Key en el servidor.' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(500).json({ error: 'Falta la API Key en el servidor.' });
     }
 
     const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
@@ -161,24 +153,14 @@ ${shipmentContext}`,
     if (!response.ok) {
       const errorData = await response.text();
       console.error('NVIDIA API Error:', errorData);
-      return new Response(JSON.stringify({ error: 'Error comunicando con la IA' }), {
-        status: 502,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(502).json({ error: 'Error comunicando con la IA' });
     }
 
     const data = await response.json();
-    
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(200).json(data);
 
   } catch (error) {
     console.error('Server error:', error);
-    return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
 }
