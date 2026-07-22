@@ -7,6 +7,7 @@ export default function Navbar({ activeMode, setActiveMode, activeTab, setActive
     { id: 'inicio', label: 'Inicio' },
     { id: 'cotizar', label: 'Cotizar' },
     { id: 'rastreo', label: 'Rastreo' },
+    { id: 'mapa', label: 'Mapa en Vivo' },
     { id: 'cobertura', label: 'Cobertura' },
   ];
 

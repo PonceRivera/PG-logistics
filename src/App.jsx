@@ -8,6 +8,7 @@ import LegalPages from './components/LegalPages';
 import LoginPage from './components/LoginPage';
 import Footer from './components/Footer';
 import Chatbot from './components/Chatbot';
+import TrackingMap from './components/TrackingMap';
 
 function AppContent() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -125,7 +126,11 @@ function AppContent() {
         onSignOut={signOut}
       />
 
-      {activeMode === 'client' && (
+      {activeMode === 'client' && activeTab === 'mapa' && (
+        <TrackingMap />
+      )}
+
+      {activeMode === 'client' && activeTab !== 'mapa' && (
         <ClientPortal
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -152,7 +157,7 @@ function AppContent() {
 
       {(activeMode === 'client' || activeMode === 'legal') && <Chatbot />}
 
-      <Footer setActiveTab={setActiveTab} setActiveMode={setActiveMode} />
+      {activeTab !== 'mapa' && <Footer setActiveTab={setActiveTab} setActiveMode={setActiveMode} />}
     </div>
   );
 }
