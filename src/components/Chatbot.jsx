@@ -1,44 +1,49 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Truck } from 'lucide-react';
 
+const QUICK_OPTIONS = [
+  { label: '📦 Rastrear envío', message: 'Quiero rastrear mi envío' },
+  { label: '💰 Cotizar flete', message: '¿Cómo puedo solicitar una cotización?' },
+  { label: '🚛 Tipos de unidad', message: '¿Qué tipos de camiones manejan?' },
+  { label: '📧 Contacto', message: '¿Cómo puedo contactarlos?' },
+];
+
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: '¡Hola! Soy el asistente de GP Logistics. ¿En qué te puedo ayudar hoy?' }
+    { role: 'assistant', content: '¡Hola! Soy el asistente de servicio al cliente de GP Logistics. Puedo ayudarte a rastrear tu envío, resolver dudas o solicitar una cotización. ¿En qué te ayudo?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showQuickOptions, setShowQuickOptions] = useState(true);
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isOpen]);
 
-  const sendMessage = async (e) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const sendMessage = async (e, overrideText) => {
+    if (e) e.preventDefault();
+    const text = overrideText || input.trim();
+    if (!text || isLoading) return;
 
-    const userMessage = { role: 'user', content: input.trim() };
+    const userMessage = { role: 'user', content: text };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput('');
     setIsLoading(true);
+    setShowQuickOptions(false);
 
     try {
-      // Llamamos a nuestro propio backend en Vercel, no a NVIDIA directamente.
-      // Así protegemos la API Key.
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: newMessages })
       });
 
-      if (!response.ok) {
-        throw new Error('Error en el servidor');
-      }
+      if (!response.ok) throw new Error('Error en el servidor');
 
       const data = await response.json();
       const aiMessage = data.choices[0].message;
@@ -48,7 +53,7 @@ export default function Chatbot() {
       console.error(error);
       setMessages([...newMessages, { 
         role: 'assistant', 
-        content: 'Lo siento, tuve un problema al procesar tu solicitud. Por favor contacta a contacto@grupoponcelogistics.com' 
+        content: 'Lo siento, tuve un problema técnico. Por favor contacta directamente a contacto@grupoponcelogistics.com y te atenderemos de inmediato.' 
       }]);
     } finally {
       setIsLoading(false);
@@ -57,24 +62,25 @@ export default function Chatbot() {
 
   return (
     <>
-      {/* Botón flotante */}
       {!isOpen && (
         <button 
           className="chatbot-toggle"
           onClick={() => setIsOpen(true)}
-          aria-label="Abrir chat"
+          aria-label="Abrir chat de servicio al cliente"
         >
           <MessageSquare size={24} />
         </button>
       )}
 
-      {/* Ventana de chat */}
       {isOpen && (
         <div className="chatbot-window">
           <div className="chatbot-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Truck size={18} />
-              <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>GP Asistente</span>
+              <div>
+                <span style={{ fontWeight: 600, fontSize: '0.9rem', display: 'block' }}>GP Asistente</span>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Servicio al Cliente</span>
+              </div>
             </div>
             <button className="chatbot-close" onClick={() => setIsOpen(false)}>
               <X size={18} />
@@ -89,10 +95,36 @@ export default function Chatbot() {
                 </div>
               </div>
             ))}
+
+            {showQuickOptions && messages.length === 1 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.25rem' }}>
+                {QUICK_OPTIONS.map((opt, i) => (
+                  <button 
+                    key={i}
+                    onClick={() => sendMessage(null, opt.message)}
+                    style={{
+                      background: 'var(--bg-main)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '16px',
+                      padding: '0.35rem 0.7rem',
+                      fontSize: '0.75rem',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      transition: 'border-color 0.15s',
+                    }}
+                    onMouseOver={e => e.target.style.borderColor = 'var(--primary)'}
+                    onMouseOut={e => e.target.style.borderColor = 'var(--border)'}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {isLoading && (
               <div className="chat-bubble-container assistant">
                 <div className="chat-bubble" style={{ opacity: 0.7 }}>
-                  Escribiendo...
+                  Consultando...
                 </div>
               </div>
             )}
@@ -102,7 +134,7 @@ export default function Chatbot() {
           <form className="chatbot-input-area" onSubmit={sendMessage}>
             <input
               type="text"
-              placeholder="Escribe tu duda aquí..."
+              placeholder="Escribe tu folio o pregunta..."
               value={input}
               onChange={e => setInput(e.target.value)}
               disabled={isLoading}
