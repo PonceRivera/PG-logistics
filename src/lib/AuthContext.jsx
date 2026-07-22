@@ -35,14 +35,6 @@ export function AuthProvider({ children }) {
     return { error };
   };
 
-  const signUp = async (email, password) => {
-    if (!isSupabaseConfigured) {
-      return { error: { message: 'Supabase no está configurado. Revisa el archivo .env' } };
-    }
-    const { error } = await supabase.auth.signUp({ email, password });
-    return { error };
-  };
-
   const signOut = async () => {
     if (!isSupabaseConfigured) return;
     await supabase.auth.signOut();
@@ -50,7 +42,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, isConfigured: isSupabaseConfigured }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signOut, isConfigured: isSupabaseConfigured }}>
       {children}
     </AuthContext.Provider>
   );
