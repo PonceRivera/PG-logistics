@@ -7,6 +7,7 @@ import AdminPortal from './components/AdminPortal';
 import LegalPages from './components/LegalPages';
 import LoginPage from './components/LoginPage';
 import Footer from './components/Footer';
+import Chatbot from './components/Chatbot';
 
 function AppContent() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -139,6 +140,8 @@ function AppContent() {
       {activeMode === 'legal' && (
         <LegalPages activeTab={activeTab} />
       )}
+
+      {(activeMode === 'client' || activeMode === 'legal') && <Chatbot />}
 
       <Footer setActiveTab={setActiveTab} setActiveMode={setActiveMode} />
     </div>
