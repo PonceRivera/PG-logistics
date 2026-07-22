@@ -11,8 +11,17 @@ import Chatbot from './components/Chatbot';
 
 function AppContent() {
   const { user, loading: authLoading, signOut } = useAuth();
-  const [activeMode, setActiveMode] = useState('client');
-  const [activeTab, setActiveTab] = useState('inicio');
+  const [activeMode, setActiveMode] = useState(() => localStorage.getItem('gpl_mode') || 'client');
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('gpl_tab') || 'inicio');
+
+  // Sync state to localStorage automatically when it changes
+  useEffect(() => {
+    localStorage.setItem('gpl_mode', activeMode);
+  }, [activeMode]);
+
+  useEffect(() => {
+    localStorage.setItem('gpl_tab', activeTab);
+  }, [activeTab]);
 
   const [quotes, setQuotes] = useState([]);
   const [carriers, setCarriers] = useState([]);
