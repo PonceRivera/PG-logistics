@@ -1,5 +1,5 @@
 import React from 'react';
-import { Truck, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 export default function Navbar({ activeMode, setActiveMode, activeTab, setActiveTab, user, onSignOut }) {
 
@@ -7,7 +7,7 @@ export default function Navbar({ activeMode, setActiveMode, activeTab, setActive
     { id: 'inicio', label: 'Inicio' },
     { id: 'cotizar', label: 'Cotizar' },
     { id: 'rastreo', label: 'Rastreo' },
-    { id: 'mapa', label: 'Mapa en Vivo' },
+    { id: 'mapa', label: 'Rastreo GPS' },
     { id: 'cobertura', label: 'Cobertura' },
   ];
 
@@ -20,8 +20,8 @@ export default function Navbar({ activeMode, setActiveMode, activeTab, setActive
   return (
     <header className="navbar">
       <div className="brand-logo" onClick={() => { setActiveMode('client'); setActiveTab('inicio'); }}>
-        <div className="brand-mark">
-          <Truck size={16} strokeWidth={2.5} />
+        <div className="brand-mark" style={{ background: '#0f172a', color: '#e14a15', fontWeight: 800, fontSize: '0.7rem', fontFamily: 'var(--font-heading)', letterSpacing: '-0.02em' }}>
+          GP
         </div>
         <span className="brand-name">GP Logistics</span>
       </div>
