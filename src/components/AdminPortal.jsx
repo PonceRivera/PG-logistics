@@ -96,9 +96,6 @@ export default function AdminPortal({ quotes, onUpdateQuote, carriers, onAddCarr
         <p className="section-overline">Panel de administración</p>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
           <h1 className="section-title">Operaciones</h1>
-          <button className="btn btn-secondary btn-sm" onClick={() => setShowCarrierModal(true)}>
-            <Plus size={14} /> Agregar transportista
-          </button>
         </div>
       </div>
 
@@ -206,34 +203,6 @@ export default function AdminPortal({ quotes, onUpdateQuote, carriers, onAddCarr
               })}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Carriers */}
-      <div className="card">
-        <div className="card-header">
-          <div>
-            <p className="card-title">Directorio de transportistas</p>
-            <p className="card-subtitle">Líneas de transporte aliadas verificadas.</p>
-          </div>
-        </div>
-
-        <div className="grid-3">
-          {carriers.map(c => (
-            <div key={c.id} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>{c.companyName}</span>
-                <span className="badge badge-delivered" style={{ fontSize: '0.68rem' }}><Shield size={10} /> SCT</span>
-              </div>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
-                {c.baseCity} · {c.contactName}
-              </p>
-              <p style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginBottom: '0.5rem' }}>
-                {Array.isArray(c.units) ? c.units.join(', ') : c.units}
-              </p>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>📞 {c.phone}</span>
-            </div>
-          ))}
         </div>
       </div>
 

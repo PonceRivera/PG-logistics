@@ -13,7 +13,6 @@ export default function Navbar({ activeMode, setActiveMode, activeTab, setActive
 
   const adminTabs = [
     { id: 'admin-dashboard', label: 'Operaciones' },
-    { id: 'admin-carriers', label: 'Transportistas' },
   ];
 
   const tabs = activeMode === 'client' ? clientTabs : (user ? adminTabs : []);
