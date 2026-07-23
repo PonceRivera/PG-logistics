@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from './lib/AuthContext';
-import { fetchQuotes, fetchCarriers, createQuote, updateQuote as dbUpdateQuote, createCarrier } from './lib/database';
+import { fetchQuotes, fetchCarriers, createQuote, updateQuote as dbUpdateQuote, deleteQuote as dbDeleteQuote, createCarrier } from './lib/database';
 import Navbar from './components/Navbar';
 import ClientPortal from './components/ClientPortal';
 import AdminPortal from './components/AdminPortal';
@@ -78,6 +78,17 @@ function AppContent() {
     }
   };
 
+  const handleDeleteQuote = async (id) => {
+    try {
+      await dbDeleteQuote(id);
+      setQuotes(prev => prev.filter(q => q.id !== id));
+    } catch (err) {
+      console.error('Error deleting quote:', err);
+      // Fallback: delete locally
+      setQuotes(prev => prev.filter(q => q.id !== id));
+    }
+  };
+
   const handleAddCarrier = async (carrier) => {
     try {
       const created = await createCarrier(carrier);
@@ -145,6 +156,7 @@ function AppContent() {
         <AdminPortal
           quotes={quotes}
           onUpdateQuote={handleUpdateQuote}
+          onDeleteQuote={handleDeleteQuote}
           carriers={carriers}
           onAddCarrier={handleAddCarrier}
           loading={dataLoading}

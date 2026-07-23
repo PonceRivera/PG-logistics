@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, DollarSign, Truck, TrendingUp, Clock, Send, Shield, Mail } from 'lucide-react';
+import { Plus, DollarSign, Truck, TrendingUp, Clock, Send, Shield, Mail, Trash2 } from 'lucide-react';
 
-export default function AdminPortal({ quotes, onUpdateQuote, carriers, onAddCarrier }) {
+export default function AdminPortal({ quotes, onUpdateQuote, onDeleteQuote, carriers, onAddCarrier }) {
   const [pricingQuote, setPricingQuote] = useState(null);
   const [dispatchQuote, setDispatchQuote] = useState(null);
   const [showCarrierModal, setShowCarrierModal] = useState(false);
@@ -216,6 +216,9 @@ export default function AdminPortal({ quotes, onUpdateQuote, carriers, onAddCarr
                             <Mail size={14} />
                           </a>
                         )}
+                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => { if(window.confirm('¿Seguro que deseas eliminar este pedido?')) onDeleteQuote(q.id); }} title="Eliminar pedido">
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </td>
                   </tr>

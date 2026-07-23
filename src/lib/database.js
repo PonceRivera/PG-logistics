@@ -71,6 +71,21 @@ export async function updateQuote(quote) {
   return mapQuoteFromDb(data);
 }
 
+export async function deleteQuote(id) {
+  if (!isSupabaseConfigured) {
+    const saved = localStorage.getItem('gpl_quotes');
+    const quotes = saved ? JSON.parse(saved) : [];
+    const updated = quotes.filter(q => q.id !== id);
+    localStorage.setItem('gpl_quotes', JSON.stringify(updated));
+    return;
+  }
+  const { error } = await supabase
+    .from('quotes')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
 // Map DB snake_case → JS camelCase
 function mapQuoteFromDb(row) {
   return {
