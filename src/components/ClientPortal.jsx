@@ -10,11 +10,15 @@ export default function ClientPortal({ activeTab, setActiveTab, quotes, onNewQuo
     phone: '',
     email: '',
     origin: 'Monterrey, NL',
+    originAddress: '',
     destination: 'Saltillo, Coah',
+    destinationAddress: '',
     unitType: 'Caja Seca 53"',
     cargoType: '',
     weightTon: '15',
-    dateRequired: ''
+    dateRequired: '',
+    timeRequired: '',
+    instructions: ''
   });
 
   const [submittedQuote, setSubmittedQuote] = useState(null);
@@ -33,11 +37,15 @@ export default function ClientPortal({ activeTab, setActiveTab, quotes, onNewQuo
       phone: formData.phone,
       email: formData.email,
       origin: formData.origin,
+      originAddress: formData.originAddress,
       destination: formData.destination,
+      destinationAddress: formData.destinationAddress,
       unitType: formData.unitType,
       cargoType: formData.cargoType,
       weightTon: Number(formData.weightTon),
       dateRequired: formData.dateRequired,
+      timeRequired: formData.timeRequired,
+      instructions: formData.instructions,
       status: 'PENDIENTE',
       carrierCost: 0,
       marginPercent: 20,
@@ -167,16 +175,26 @@ export default function ClientPortal({ activeTab, setActiveTab, quotes, onNewQuo
 
               <div className="grid-2">
                 <div className="form-group">
-                  <label className="form-label">Origen</label>
+                  <label className="form-label">Ciudad de origen</label>
                   <select className="form-select" value={formData.origin} onChange={e => setFormData({...formData, origin: e.target.value})}>
                     {HUBS.map(h => <option key={h}>{h}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Destino</label>
+                  <label className="form-label">Dirección / Planta de recolección</label>
+                  <input type="text" placeholder="Ej. Parque Industrial Apodaca, Bodega 4" className="form-control"
+                    value={formData.originAddress} onChange={e => setFormData({...formData, originAddress: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Ciudad de destino</label>
                   <select className="form-select" value={formData.destination} onChange={e => setFormData({...formData, destination: e.target.value})}>
                     {HUBS.map(h => <option key={h}>{h}</option>)}
                   </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Dirección / Planta de entrega</label>
+                  <input type="text" placeholder="Ej. Zona Industrial Saltillo, Av. Central #120" className="form-control"
+                    value={formData.destinationAddress} onChange={e => setFormData({...formData, destinationAddress: e.target.value})} />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Tipo de unidad</label>
@@ -199,9 +217,20 @@ export default function ClientPortal({ activeTab, setActiveTab, quotes, onNewQuo
                   <input type="date" required className="form-control"
                     value={formData.dateRequired} onChange={e => setFormData({...formData, dateRequired: e.target.value})} />
                 </div>
+                <div className="form-group">
+                  <label className="form-label">Hora requerida de recolección</label>
+                  <input type="time" className="form-control"
+                    value={formData.timeRequired} onChange={e => setFormData({...formData, timeRequired: e.target.value})} />
+                </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.75rem' }}>
+              <div className="form-group" style={{ marginTop: '0.75rem' }}>
+                <label className="form-label">Instrucciones especiales u observaciones</label>
+                <textarea rows="3" placeholder="Ej. Se requiere rampas de descarga, equipo EPP completo para operador, citas previas, etc." className="form-control" style={{ resize: 'vertical' }}
+                  value={formData.instructions} onChange={e => setFormData({...formData, instructions: e.target.value})} />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
                 <button type="submit" className="btn btn-primary">Enviar solicitud</button>
               </div>
             </form>

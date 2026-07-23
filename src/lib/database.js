@@ -94,6 +94,10 @@ function mapQuoteFromDb(row) {
     currentLocation: row.current_location || '',
     eta: row.eta || '',
     trackingHistory: row.tracking_history || [],
+    timeRequired: row.time_required || '',
+    originAddress: row.origin_address || '',
+    destinationAddress: row.destination_address || '',
+    instructions: row.instructions || '',
     createdAt: row.created_at
   };
 }
@@ -120,7 +124,11 @@ function mapQuoteToDb(quote) {
     truck_plate: quote.truckPlate,
     current_location: quote.currentLocation,
     eta: quote.eta,
-    tracking_history: quote.trackingHistory || []
+    tracking_history: quote.trackingHistory || [],
+    time_required: quote.timeRequired || '',
+    origin_address: quote.originAddress || '',
+    destination_address: quote.destinationAddress || '',
+    instructions: quote.instructions || ''
   };
 }
 

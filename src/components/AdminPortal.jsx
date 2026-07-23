@@ -172,7 +172,27 @@ export default function AdminPortal({ quotes, onUpdateQuote, carriers, onAddCarr
                         <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>{q.contactName}</span>
                       </div>
                     </td>
-                    <td style={{ fontSize: '0.8rem' }}>{q.origin} → {q.destination}</td>
+                    <td style={{ fontSize: '0.8rem' }}>
+                      <div style={{ lineHeight: '1.35' }}>
+                        <span>{q.origin} → {q.destination}</span>
+                        {(q.originAddress || q.destinationAddress) && (
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '0.15rem' }}>
+                            {q.originAddress && <span>📍 Orig: {q.originAddress}<br /></span>}
+                            {q.destinationAddress && <span>📍 Dest: {q.destinationAddress}</span>}
+                          </div>
+                        )}
+                        {(q.dateRequired || q.timeRequired) && (
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
+                            📅 {q.dateRequired} {q.timeRequired && `⏰ ${q.timeRequired}`}
+                          </div>
+                        )}
+                        {q.instructions && (
+                          <div style={{ fontSize: '0.7rem', color: 'var(--warning)', marginTop: '0.15rem', fontStyle: 'italic' }}>
+                            💬 {q.instructions}
+                          </div>
+                        )}
+                      </div>
+                    </td>
                     <td style={{ fontSize: '0.8rem' }}>{q.unitType}</td>
                     <td><span className={`badge ${statusMap[q.status]}`}>{statusText[q.status]}</span></td>
                     <td>{q.carrierCost ? `$${q.carrierCost.toLocaleString()}` : '—'}</td>
@@ -212,6 +232,14 @@ export default function AdminPortal({ quotes, onUpdateQuote, carriers, onAddCarr
           <div className="modal-box" onClick={e => e.stopPropagation()}>
             <p className="modal-title">Asignar tarifa · {pricingQuote.id}</p>
             <p className="modal-desc">{pricingQuote.origin} → {pricingQuote.destination} ({pricingQuote.unitType})</p>
+
+            {/* Extra Quote Details */}
+            <div style={{ background: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem', marginBottom: '1rem', fontSize: '0.8rem', lineHeight: '1.5' }}>
+              {pricingQuote.originAddress && <div><strong>Dirección Origen:</strong> {pricingQuote.originAddress}</div>}
+              {pricingQuote.destinationAddress && <div><strong>Dirección Destino:</strong> {pricingQuote.destinationAddress}</div>}
+              {pricingQuote.dateRequired && <div><strong>Fecha / Hora:</strong> {pricingQuote.dateRequired} {pricingQuote.timeRequired}</div>}
+              {pricingQuote.instructions && <div style={{ color: 'var(--warning)', marginTop: '0.25rem' }}><strong>Instrucciones:</strong> {pricingQuote.instructions}</div>}
+            </div>
 
             <div className="form-group">
               <label className="form-label">Costo del fletero (MXN)</label>
