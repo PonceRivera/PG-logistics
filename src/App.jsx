@@ -9,6 +9,7 @@ import LoginPage from './components/LoginPage';
 import Footer from './components/Footer';
 import Chatbot from './components/Chatbot';
 import TrackingMap from './components/TrackingMap';
+import EmailProspector from './components/EmailProspector';
 
 function AppContent() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -152,7 +153,7 @@ function AppContent() {
 
       {activeMode === 'admin' && showLogin && <LoginPage />}
 
-      {activeMode === 'admin' && !showLogin && (
+      {activeMode === 'admin' && !showLogin && activeTab === 'admin-dashboard' && (
         <AdminPortal
           quotes={quotes}
           onUpdateQuote={handleUpdateQuote}
@@ -161,6 +162,10 @@ function AppContent() {
           onAddCarrier={handleAddCarrier}
           loading={dataLoading}
         />
+      )}
+
+      {activeMode === 'admin' && !showLogin && activeTab === 'admin-emails' && (
+        <EmailProspector />
       )}
 
       {activeMode === 'legal' && (
