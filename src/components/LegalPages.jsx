@@ -73,8 +73,9 @@ export default function LegalPages({ activeTab }) {
               <h3>6. Condiciones de pago</h3>
               <ul>
                 <li>Los pagos se realizarán mediante transferencia bancaria o depósito a la cuenta indicada en la factura CFDI emitida por GP Logistics.</li>
-                <li>Plazo de pago estándar: <strong>15 días naturales</strong> a partir de la fecha de entrega del embarque y la recepción de evidencia de entrega (POD).</li>
-                <li>En caso de retraso en el pago, GP Logistics se reserva el derecho de suspender servicios futuros.</li>
+                <li>Para iniciar las operaciones y confirmar la asignación del transporte, el cliente deberá realizar un **pago anticipado de al menos el 30%** del valor total cotizado.</li>
+                <li>El **70% restante** del saldo total deberá ser liquidado una vez que el viaje/embarque esté listo para entrega o según lo acordado previamente por escrito antes de la descarga.</li>
+                <li>En caso de retraso en el pago, GP Logistics se reserva el derecho de suspender servicios futuros o detener la entrega de la mercancía.</li>
               </ul>
 
               <h3>7. Cancelaciones</h3>

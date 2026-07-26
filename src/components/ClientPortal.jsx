@@ -3,7 +3,8 @@ import { Search, CheckCircle2, ArrowRight, AlertCircle, Mail } from 'lucide-reac
 import { HUBS, UNIT_TYPES } from '../mockData';
 import { fetchQuoteByFolio } from '../lib/database';
 
-export default function ClientPortal({ activeTab, setActiveTab, quotes, onNewQuote }) {
+export default function ClientPortal({ activeTab, setActiveTab, setActiveMode, quotes, onNewQuote }) {
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [formData, setFormData] = useState({
     clientCompany: '',
     contactName: '',
@@ -230,8 +231,38 @@ export default function ClientPortal({ activeTab, setActiveTab, quotes, onNewQuo
                   value={formData.instructions} onChange={e => setFormData({...formData, instructions: e.target.value})} />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                <button type="submit" className="btn btn-primary">Enviar solicitud</button>
+              <div className="form-group" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginTop: '1.25rem' }}>
+                <input 
+                  type="checkbox" 
+                  id="acceptTerms" 
+                  required 
+                  checked={acceptedTerms}
+                  onChange={e => setAcceptedTerms(e.target.checked)} 
+                  style={{ marginTop: '0.2rem', width: 'auto', display: 'inline-block' }}
+                />
+                <label htmlFor="acceptTerms" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                  Acepto los{' '}
+                  <button 
+                    type="button"
+                    onClick={() => { setActiveMode('legal'); setActiveTab('terminos'); }} 
+                    style={{ background: 'none', border: 'none', padding: 0, color: 'var(--primary)', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}
+                  >
+                    Términos y Condiciones
+                  </button>{' '}
+                  y el{' '}
+                  <button 
+                    type="button"
+                    onClick={() => { setActiveMode('legal'); setActiveTab('privacidad'); }} 
+                    style={{ background: 'none', border: 'none', padding: 0, color: 'var(--primary)', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}
+                  >
+                    Aviso de Privacidad
+                  </button>{' '}
+                  de GP Logistics.
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.25rem' }}>
+                <button type="submit" className="btn btn-primary" disabled={!acceptedTerms}>Enviar solicitud</button>
               </div>
             </form>
           ) : (

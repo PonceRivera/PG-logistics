@@ -146,6 +146,7 @@ function AppContent() {
         <ClientPortal
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          setActiveMode={setActiveMode}
           quotes={quotes}
           onNewQuote={handleNewQuote}
         />
