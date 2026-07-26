@@ -121,18 +121,29 @@ export default function EmailProspector() {
         const data = XLSX.utils.sheet_to_json(ws);
 
         const newQueue = [];
+        const headers = Object.keys(data[0] || {});
+        
+        // Buscar columnas de forma flexible (por coincidencia parcial)
+        const findCol = (row, ...keywords) => {
+          for (const key of Object.keys(row)) {
+            const lower = key.toLowerCase();
+            if (keywords.some(kw => lower.includes(kw))) return row[key];
+          }
+          return '';
+        };
+
         data.forEach(row => {
-          const name = row['Nombre de la Empresa'] || row['Empresa'] || row['Company'] || '';
-          const mail = row['Correo Electrónico'] || row['Correo'] || row['Email'] || '';
+          const name = findCol(row, 'empresa', 'company', 'nombre de la empresa');
+          const mail = findCol(row, 'correo', 'email', 'e-mail');
           let rawEmail = String(mail).split('/')[0].trim();
 
           if (name && rawEmail && rawEmail.includes('@') && !rawEmail.includes('contacto via')) {
             newQueue.push({
               companyName: name,
-              contactName: row['Contacto'] || '',
+              contactName: findCol(row, 'contacto', 'contact'),
               email: rawEmail,
               companyType: uploadType,
-              notes: row['Tipo de Equipo/Servicio'] || row['Sector/Industria'] || row['Notas'] || '',
+              notes: findCol(row, 'tipo de equipo', 'tipo de carga', 'sector', 'industria', 'servicio', 'notas'),
             });
           }
         });
