@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { Sparkles, Send, Copy, Check, Building2, Truck, RefreshCw, Mail, User, FileText } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Sparkles, Send, Copy, Check, Building2, Truck, RefreshCw, Mail, User, FileText, Upload, Play, Pause, Trash2 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 export default function EmailProspector() {
+  // Manual Generation State
   const [companyName, setCompanyName] = useState('');
   const [contactName, setContactName] = useState('');
   const [email, setEmail] = useState('');
@@ -14,9 +16,136 @@ export default function EmailProspector() {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // History of sent/generated emails
   const [history, setHistory] = useState([]);
 
+  // Campaign Queue State
+  const [campaignQueue, setCampaignQueue] = useState(() => {
+    const saved = localStorage.getItem('gpl_campaign_queue');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [isCampaignRunning, setIsCampaignRunning] = useState(false);
+  const [timeUntilNext, setTimeUntilNext] = useState(0); // seconds
+  const [campaignLog, setCampaignLog] = useState([]);
+
+  const timerRef = useRef(null);
+
+  // Sync queue to localstorage
+  useEffect(() => {
+    localStorage.setItem('gpl_campaign_queue', JSON.stringify(campaignQueue));
+  }, [campaignQueue]);
+
+  // Campaign Timer Logic
+  useEffect(() => {
+    if (isCampaignRunning && campaignQueue.length > 0) {
+      if (timeUntilNext <= 0) {
+        // Time to send!
+        sendNextInQueue();
+      } else {
+        timerRef.current = setTimeout(() => {
+          setTimeUntilNext(prev => prev - 1);
+        }, 1000);
+      }
+    } else if (isCampaignRunning && campaignQueue.length === 0) {
+      setIsCampaignRunning(false);
+    }
+    return () => clearTimeout(timerRef.current);
+  }, [isCampaignRunning, timeUntilNext, campaignQueue]);
+
+  const sendNextInQueue = async () => {
+    if (campaignQueue.length === 0) return;
+    const prospect = campaignQueue[0];
+    
+    // Default wait time between emails: 5 minutes (300 seconds)
+    // To avoid spam limits. Using 15 seconds for testing if you want, but 300 is safe.
+    const waitTime = 300; 
+
+    try {
+      addLog(`Procesando a: ${prospect.companyName} (${prospect.email})`, 'info');
+      
+      const res = await fetch('/api/send-campaign-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prospect),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || 'Error del servidor');
+
+      addLog(`✅ Enviado exitosamente a ${prospect.email} (Asunto: ${data.subject})`, 'success');
+      
+      // Remove from queue
+      setCampaignQueue(prev => prev.slice(1));
+      
+      // Reset timer
+      setTimeUntilNext(waitTime);
+    } catch (err) {
+      addLog(`❌ Falló envío a ${prospect.companyName}: ${err.message}`, 'error');
+      // Pausar campaña en caso de error para que el usuario revise
+      setIsCampaignRunning(false);
+    }
+  };
+
+  const addLog = (msg, type) => {
+    setCampaignLog(prev => [{ time: new Date().toLocaleTimeString(), msg, type }, ...prev].slice(0, 50));
+  };
+
+  const toggleCampaign = () => {
+    if (!isCampaignRunning && timeUntilNext === 0) {
+      setTimeUntilNext(1); // Arrancar casi inmediatamente el primero
+    }
+    setIsCampaignRunning(!isCampaignRunning);
+  };
+
+  const clearQueue = () => {
+    if(window.confirm('¿Seguro que deseas vaciar toda la cola de correos?')) {
+      setCampaignQueue([]);
+      setIsCampaignRunning(false);
+    }
+  };
+
+  const handleExcelUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+
+        const newQueue = [];
+        data.forEach(row => {
+          // Ajusta estos nombres según los encabezados de tu Excel
+          const name = row['Nombre de la Empresa'] || row['Empresa'] || row['Company'] || '';
+          const mail = row['Correo Electrónico'] || row['Correo'] || row['Email'] || '';
+          let rawEmail = String(mail).split('/')[0].trim(); // Take first email if multiple
+
+          if (name && rawEmail && rawEmail.includes('@')) {
+            newQueue.push({
+              companyName: name,
+              contactName: row['Contacto'] || '',
+              email: rawEmail,
+              companyType: 'fletera', // Por defecto, se puede cambiar en la UI o basado en alguna columna
+              notes: row['Tipo de Equipo/Servicio'] || row['Notas'] || '',
+            });
+          }
+        });
+
+        setCampaignQueue(prev => [...prev, ...newQueue]);
+        addLog(`Cargados ${newQueue.length} prospectos desde Excel.`, 'info');
+      } catch (err) {
+        alert('Error al leer el Excel. Verifica el formato.');
+      }
+    };
+    reader.readAsBinaryString(file);
+    e.target.value = ''; // Reset input
+  };
+
+  // --- Funciones para Generación Manual (Individual) ---
   const generateEmail = async () => {
     if (!companyName.trim() || !email.trim()) {
       setError('Ingresa al menos el nombre de la empresa y el correo.');
@@ -44,17 +173,12 @@ export default function EmailProspector() {
     }
   };
 
-  const regenerate = () => {
-    generateEmail();
-  };
-
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(generatedBody);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback
       const ta = document.createElement('textarea');
       ta.value = generatedBody;
       document.body.appendChild(ta);
@@ -70,99 +194,140 @@ export default function EmailProspector() {
     const subject = encodeURIComponent(generatedSubject);
     const body = encodeURIComponent(generatedBody);
     window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+    setHistory(prev => [{ company: companyName, email, type: companyType, date: new Date().toLocaleString('es-MX'), subject: generatedSubject }, ...prev]);
+  };
 
-    // Add to history
-    setHistory(prev => [{
-      company: companyName,
-      email,
-      type: companyType,
-      date: new Date().toLocaleString('es-MX'),
-      subject: generatedSubject,
-    }, ...prev]);
+  const formatTime = (sec) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s < 10 ? '0'+s : s}`;
   };
 
   return (
     <div className="page-content">
       <div className="section-header" style={{ marginTop: '0.5rem' }}>
-        <p className="section-overline">Herramienta de prospección</p>
-        <h1 className="section-title">Generador de Emails con IA</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
-          La IA redacta correos personalizados y persuasivos para cada empresa. Tú solo revisas y envías.
-        </p>
+        <p className="section-overline">Herramienta de prospección y automatización</p>
+        <h1 className="section-title">Generador de Emails y Campañas</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+      {/* CAMPAIGN QUEUE SECTION (NUEVO) */}
+      <div className="card" style={{ marginBottom: '1.5rem', border: isCampaignRunning ? '2px solid var(--primary)' : '1px solid var(--border)' }}>
+        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <p className="card-title">Campaña de Correos Automática (Drip Campaign)</p>
+            <p className="card-subtitle">Sube tu Excel. Se enviará 1 correo generado por IA cada 5 minutos usando tu propio correo SMTP.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <label className="btn btn-ghost" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Upload size={16} /> Subir Excel
+              <input type="file" accept=".xlsx, .xls, .csv" onChange={handleExcelUpload} style={{ display: 'none' }} />
+            </label>
+            {campaignQueue.length > 0 && (
+              <button 
+                className={`btn ${isCampaignRunning ? 'btn-danger' : 'btn-primary'}`} 
+                onClick={toggleCampaign}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', width: '130px', justifyContent: 'center' }}
+              >
+                {isCampaignRunning ? <><Pause size={16} /> Pausar</> : <><Play size={16} /> Iniciar</>}
+              </button>
+            )}
+          </div>
+        </div>
+        
+        <div style={{ padding: '1.25rem', display: 'flex', gap: '1.5rem' }}>
+          {/* Cola de Envíos */}
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>Cola de Envíos ({campaignQueue.length})</span>
+              {campaignQueue.length > 0 && (
+                <button onClick={clearQueue} style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                  <Trash2 size={12}/> Vaciar
+                </button>
+              )}
+            </div>
+            
+            <div style={{ background: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', height: '200px', overflowY: 'auto' }}>
+              {campaignQueue.length === 0 ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
+                  No hay contactos en cola. Sube un archivo Excel.
+                </div>
+              ) : (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {campaignQueue.map((c, i) => (
+                    <li key={i} style={{ padding: '0.5rem 1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                      <div>
+                        <strong>{c.companyName}</strong><br/>
+                        <span style={{ color: 'var(--text-tertiary)' }}>{c.email}</span>
+                      </div>
+                      {i === 0 && isCampaignRunning && (
+                        <div style={{ textAlign: 'right', color: 'var(--primary)' }}>
+                          <span className="spin" style={{ display: 'inline-block', marginRight: '5px' }}>⏳</span>
+                          Enviando en {formatTime(timeUntilNext)}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
 
+          {/* Registro de Actividad (Log) */}
+          <div style={{ flex: 1 }}>
+            <span style={{ fontWeight: 600, fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>Registro de Actividad</span>
+            <div style={{ background: '#000', color: '#0f0', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', height: '200px', overflowY: 'auto', padding: '0.75rem', fontSize: '0.75rem', fontFamily: 'monospace' }}>
+              {campaignLog.length === 0 ? (
+                <span style={{ color: '#555' }}>Esperando actividad...</span>
+              ) : (
+                campaignLog.map((log, i) => (
+                  <div key={i} style={{ marginBottom: '0.4rem', color: log.type === 'error' ? '#f44' : log.type === 'info' ? '#aaa' : '#0f0' }}>
+                    <span style={{ color: '#888' }}>[{log.time}]</span> {log.msg}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      {/* MANUAL GENERATOR */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
         {/* LEFT: Form */}
         <div className="card">
           <div className="card-header">
             <div>
-              <p className="card-title">Datos del prospecto</p>
-              <p className="card-subtitle">Llena los datos y la IA redactará el correo perfecto.</p>
+              <p className="card-title">Redacción Manual</p>
+              <p className="card-subtitle">Redacta un correo único para un prospecto específico.</p>
             </div>
           </div>
           <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-
-            {/* Type Selector */}
             <div>
               <label className="form-label">Tipo de empresa</label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button
-                  type="button"
-                  className={`btn ${companyType === 'fletera' ? 'btn-primary' : 'btn-ghost'}`}
-                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
-                  onClick={() => setCompanyType('fletera')}
-                >
+                <button type="button" className={`btn ${companyType === 'fletera' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCompanyType('fletera')} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
                   <Truck size={14} /> Fletera (Proveedor)
                 </button>
-                <button
-                  type="button"
-                  className={`btn ${companyType === 'cliente' ? 'btn-primary' : 'btn-ghost'}`}
-                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
-                  onClick={() => setCompanyType('cliente')}
-                >
+                <button type="button" className={`btn ${companyType === 'cliente' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCompanyType('cliente')} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
                   <Building2 size={14} /> Cliente (Fábrica)
                 </button>
               </div>
             </div>
-
             <div className="form-group">
               <label className="form-label">Nombre de la empresa *</label>
-              <input type="text" className="form-control" placeholder="Ej. Trayecto, Nemak, Whirlpool..."
-                value={companyName} onChange={e => setCompanyName(e.target.value)} />
+              <input type="text" className="form-control" value={companyName} onChange={e => setCompanyName(e.target.value)} />
             </div>
-
-            <div className="form-group">
-              <label className="form-label">Nombre del contacto (opcional)</label>
-              <input type="text" className="form-control" placeholder="Ej. Lic. Mario Garza"
-                value={contactName} onChange={e => setContactName(e.target.value)} />
-            </div>
-
             <div className="form-group">
               <label className="form-label">Correo electrónico *</label>
-              <input type="email" className="form-control" placeholder="ventas@empresa.com"
-                value={email} onChange={e => setEmail(e.target.value)} />
+              <input type="email" className="form-control" value={email} onChange={e => setEmail(e.target.value)} />
             </div>
-
             <div className="form-group">
-              <label className="form-label">Notas adicionales (opcional)</label>
-              <textarea className="form-control" rows={2} placeholder="Ej. Manejan rutas Monterrey-CDMX, tienen 30 cajas secas..."
-                value={notes} onChange={e => setNotes(e.target.value)} />
+              <label className="form-label">Notas / Contacto</label>
+              <textarea className="form-control" rows={2} value={notes} onChange={e => setNotes(e.target.value)} />
             </div>
-
-            {error && (
-              <div style={{ color: 'var(--danger)', fontSize: '0.8rem', background: 'var(--danger-bg, rgba(239,68,68,0.1))', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)' }}>
-                {error}
-              </div>
-            )}
-
-            <button className="btn btn-primary" onClick={generateEmail} disabled={loading}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', padding: '0.65rem' }}>
-              {loading ? (
-                <><RefreshCw size={15} className="spin" /> Generando con IA...</>
-              ) : (
-                <><Sparkles size={15} /> Generar Email con IA</>
-              )}
+            {error && <div style={{ color: 'var(--danger)', fontSize: '0.8rem', padding: '0.5rem', background: 'rgba(239,68,68,0.1)', borderRadius: '4px' }}>{error}</div>}
+            <button className="btn btn-primary" onClick={generateEmail} disabled={loading} style={{ width: '100%' }}>
+              {loading ? <><RefreshCw size={15} className="spin" style={{ display: 'inline', marginRight: '5px' }}/> Generando...</> : <><Sparkles size={15} style={{ display: 'inline', marginRight: '5px' }}/> Generar Borrador</>}
             </button>
           </div>
         </div>
@@ -171,61 +336,37 @@ export default function EmailProspector() {
         <div className="card">
           <div className="card-header">
             <div>
-              <p className="card-title">Vista previa del correo</p>
-              <p className="card-subtitle">Revisa, edita si quieres, y envía.</p>
+              <p className="card-title">Vista previa</p>
             </div>
           </div>
           <div style={{ padding: '1.25rem' }}>
             {!generatedBody && !loading && (
-              <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-tertiary)' }}>
-                <Mail size={40} style={{ opacity: 0.3, marginBottom: '0.75rem' }} />
-                <p style={{ fontSize: '0.85rem' }}>Llena los datos del prospecto y haz clic en "Generar Email con IA"</p>
+              <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-tertiary)' }}>
+                <Mail size={32} style={{ opacity: 0.3, marginBottom: '0.5rem' }} />
+                <p style={{ fontSize: '0.85rem' }}>Redacta un correo manual</p>
               </div>
             )}
-
             {loading && (
-              <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--primary)' }}>
-                <RefreshCw size={32} className="spin" style={{ marginBottom: '0.75rem' }} />
-                <p style={{ fontSize: '0.85rem' }}>La IA está redactando tu correo...</p>
+              <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--primary)' }}>
+                <RefreshCw size={24} className="spin" style={{ marginBottom: '0.5rem' }} />
+                <p style={{ fontSize: '0.85rem' }}>Redactando...</p>
               </div>
             )}
-
             {generatedBody && !loading && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {/* To */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem' }}>
-                  <span style={{ color: 'var(--text-tertiary)', fontWeight: 500 }}>Para:</span>
-                  <span style={{ color: 'var(--primary)' }}>{email}</span>
+                  <span style={{ color: 'var(--text-tertiary)', fontWeight: 500 }}>Para:</span><span style={{ color: 'var(--primary)' }}>{email}</span>
                 </div>
-
-                {/* Subject */}
                 <div>
-                  <label className="form-label" style={{ fontSize: '0.72rem' }}>Asunto:</label>
-                  <input type="text" className="form-control" value={generatedSubject}
-                    onChange={e => setGeneratedSubject(e.target.value)} style={{ fontWeight: 600 }} />
+                  <input type="text" className="form-control" value={generatedSubject} onChange={e => setGeneratedSubject(e.target.value)} style={{ fontWeight: 600, fontSize: '0.8rem' }} />
                 </div>
-
-                {/* Body */}
                 <div>
-                  <label className="form-label" style={{ fontSize: '0.72rem' }}>Cuerpo:</label>
-                  <textarea className="form-control" rows={12} value={generatedBody}
-                    onChange={e => setGeneratedBody(e.target.value)}
-                    style={{ fontSize: '0.82rem', lineHeight: '1.6', fontFamily: 'inherit' }} />
+                  <textarea className="form-control" rows={10} value={generatedBody} onChange={e => setGeneratedBody(e.target.value)} style={{ fontSize: '0.82rem', lineHeight: '1.6', fontFamily: 'inherit' }} />
                 </div>
-
-                {/* Actions */}
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <button className="btn btn-primary" onClick={openInGmail}
-                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-                    <Send size={14} /> Enviar con Gmail
-                  </button>
-                  <button className="btn btn-ghost" onClick={copyToClipboard}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    {copied ? <><Check size={14} /> Copiado!</> : <><Copy size={14} /> Copiar</>}
-                  </button>
-                  <button className="btn btn-ghost" onClick={regenerate}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <RefreshCw size={14} /> Regenerar
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button className="btn btn-primary" onClick={openInGmail} style={{ flex: 1 }}><Send size={14} style={{ display: 'inline', marginRight: '4px' }}/> Enviar con Gmail</button>
+                  <button className="btn btn-ghost" onClick={copyToClipboard}>
+                    {copied ? <Check size={14} /> : <Copy size={14} />}
                   </button>
                 </div>
               </div>
@@ -233,44 +374,6 @@ export default function EmailProspector() {
           </div>
         </div>
       </div>
-
-      {/* History */}
-      {history.length > 0 && (
-        <div className="card" style={{ marginTop: '1.5rem' }}>
-          <div className="card-header">
-            <div>
-              <p className="card-title">Correos enviados en esta sesión</p>
-              <p className="card-subtitle">Registro de los correos que has mandado hoy.</p>
-            </div>
-          </div>
-          <div className="table-wrap">
-            <table className="clean-table">
-              <thead>
-                <tr>
-                  <th>Empresa</th>
-                  <th>Correo</th>
-                  <th>Tipo</th>
-                  <th>Asunto</th>
-                  <th>Fecha</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.map((h, i) => (
-                  <tr key={i}>
-                    <td><strong>{h.company}</strong></td>
-                    <td style={{ fontSize: '0.8rem' }}>{h.email}</td>
-                    <td><span className={`badge ${h.type === 'fletera' ? 'badge-transit' : 'badge-confirmed'}`}>
-                      {h.type === 'fletera' ? 'Fletera' : 'Cliente'}
-                    </span></td>
-                    <td style={{ fontSize: '0.8rem' }}>{h.subject}</td>
-                    <td style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)' }}>{h.date}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
 
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
