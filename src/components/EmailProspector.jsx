@@ -24,8 +24,11 @@ export default function EmailProspector() {
     return saved ? JSON.parse(saved) : [];
   });
   const [isCampaignRunning, setIsCampaignRunning] = useState(false);
-  const [timeUntilNext, setTimeUntilNext] = useState(0); // seconds
+  const [timeUntilNext, setTimeUntilNext] = useState(0);
   const [campaignLog, setCampaignLog] = useState([]);
+
+  const fleteraInputRef = React.useRef(null);
+  const clienteInputRef = React.useRef(null);
 
   const timerRef = useRef(null);
 
@@ -104,7 +107,7 @@ export default function EmailProspector() {
     }
   };
 
-  const handleExcelUpload = (e) => {
+  const handleExcelUpload = (e, uploadType) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -119,30 +122,29 @@ export default function EmailProspector() {
 
         const newQueue = [];
         data.forEach(row => {
-          // Ajusta estos nombres según los encabezados de tu Excel
           const name = row['Nombre de la Empresa'] || row['Empresa'] || row['Company'] || '';
           const mail = row['Correo Electrónico'] || row['Correo'] || row['Email'] || '';
-          let rawEmail = String(mail).split('/')[0].trim(); // Take first email if multiple
+          let rawEmail = String(mail).split('/')[0].trim();
 
-          if (name && rawEmail && rawEmail.includes('@')) {
+          if (name && rawEmail && rawEmail.includes('@') && !rawEmail.includes('contacto via')) {
             newQueue.push({
               companyName: name,
               contactName: row['Contacto'] || '',
               email: rawEmail,
-              companyType: 'fletera', // Por defecto, se puede cambiar en la UI o basado en alguna columna
-              notes: row['Tipo de Equipo/Servicio'] || row['Notas'] || '',
+              companyType: uploadType,
+              notes: row['Tipo de Equipo/Servicio'] || row['Sector/Industria'] || row['Notas'] || '',
             });
           }
         });
 
         setCampaignQueue(prev => [...prev, ...newQueue]);
-        addLog(`Cargados ${newQueue.length} prospectos desde Excel.`, 'info');
+        addLog(`📂 Cargados ${newQueue.length} ${uploadType === 'fletera' ? 'fleteras' : 'clientes'} desde Excel.`, 'info');
       } catch (err) {
         alert('Error al leer el Excel. Verifica el formato.');
       }
     };
     reader.readAsBinaryString(file);
-    e.target.value = ''; // Reset input
+    e.target.value = '';
   };
 
   // --- Funciones para Generación Manual (Individual) ---
@@ -217,10 +219,14 @@ export default function EmailProspector() {
             <p className="card-title">Campaña de Correos Automática (Drip Campaign)</p>
             <p className="card-subtitle">Sube tu Excel. Se enviará 1 correo generado por IA cada 5 minutos usando tu propio correo SMTP.</p>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <label className="btn btn-ghost" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Upload size={16} /> Subir Excel
-              <input type="file" accept=".xlsx, .xls, .csv" onChange={handleExcelUpload} style={{ display: 'none' }} />
+              <Truck size={14} /> Subir Fleteras
+              <input ref={fleteraInputRef} type="file" accept=".xlsx, .xls, .csv" onChange={(e) => handleExcelUpload(e, 'fletera')} style={{ display: 'none' }} />
+            </label>
+            <label className="btn btn-ghost" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Building2 size={14} /> Subir Clientes
+              <input ref={clienteInputRef} type="file" accept=".xlsx, .xls, .csv" onChange={(e) => handleExcelUpload(e, 'cliente')} style={{ display: 'none' }} />
             </label>
             {campaignQueue.length > 0 && (
               <button 
