@@ -40,7 +40,7 @@ DATOS:
 CONTEXTO DE QUIÉN ENVÍA:
 - Empresa: GP Logistics (Grupo Ponce Logistics)
 - Director Comercial: Christopher Ponce Rivera
-- Web: https://pg-logistics.vercel.app/
+- Web: https://ponces-logistics.com/
 - Correo: contacto@grupoponcelogistics.com
 - Somos una agencia integradora de servicios logísticos con base en el norte de México.
 - Estamos buscando alianzas con líneas de transporte para asignarles volúmenes de carga de nuestros clientes.
@@ -53,7 +53,7 @@ INSTRUCCIONES DE FORMATO:
 - Genera SOLO el cuerpo del correo.
 - Tono: Muy profesional.
 - Largo: 3-4 párrafos máximo.
-- Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://pg-logistics.vercel.app/`;
+- Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://ponces-logistics.com/`;
     } else {
       prompt = `Genera un correo electrónico profesional de ventas B2B en español para enviar a una empresa manufacturera o comercial.
 DATOS:
@@ -64,7 +64,7 @@ DATOS:
 CONTEXTO DE QUIÉN ENVÍA:
 - Empresa: GP Logistics (Grupo Ponce Logistics)
 - Director Comercial: Christopher Ponce Rivera
-- Web: https://pg-logistics.vercel.app/
+- Web: https://ponces-logistics.com/
 - Correo: contacto@grupoponcelogistics.com
 - Ofrecemos transporte terrestre con rastreo satelital en tiempo real, cotizador automático con IA.
 
@@ -76,7 +76,7 @@ INSTRUCCIONES DE FORMATO:
 - Genera SOLO el cuerpo del correo.
 - Tono: Profesional, moderno.
 - Largo: 3-4 párrafos máximo.
-- Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://pg-logistics.vercel.app/`;
+- Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://ponces-logistics.com/`;
     }
 
     // Call NVIDIA for Body

@@ -29,7 +29,7 @@ DATOS:
 CONTEXTO DE QUIÉN ENVÍA:
 - Empresa: GP Logistics (Grupo Ponce Logistics)
 - Director Comercial: Christopher Ponce Rivera
-- Web: https://pg-logistics.vercel.app/
+- Web: https://ponces-logistics.com/
 - Correo: contacto@grupoponcelogistics.com
 - Somos una agencia integradora de servicios logísticos con base en el norte de México (Coahuila/Nuevo León).
 - Estamos buscando alianzas con líneas de transporte para asignarles volúmenes de carga de nuestros clientes.
@@ -45,7 +45,7 @@ INSTRUCCIONES DE FORMATO:
 - Tono: Muy profesional, corporativo, confiable. Que suene como una empresa grande.
 - Largo: 3-4 párrafos máximo. Conciso pero contundente.
 - NO uses palabras como "intermediario" o "comisionista", usa "agencia integradora" o "brazo comercial".
-- Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://pg-logistics.vercel.app/`;
+- Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://ponces-logistics.com/`;
     } else {
       prompt = `Genera un correo electrónico profesional de ventas B2B en español para enviar a una empresa manufacturera o comercial que podría necesitar servicios de transporte de carga.
 
@@ -57,7 +57,7 @@ DATOS:
 CONTEXTO DE QUIÉN ENVÍA:
 - Empresa: GP Logistics (Grupo Ponce Logistics)
 - Director Comercial: Christopher Ponce Rivera
-- Web: https://pg-logistics.vercel.app/
+- Web: https://ponces-logistics.com/
 - Correo: contacto@grupoponcelogistics.com
 - Somos una agencia integradora de servicios logísticos con base en el norte de México.
 - Ofrecemos transporte terrestre con rastreo satelital en tiempo real, cotizador automático con IA, y red de transportistas verificados.
@@ -75,7 +75,7 @@ INSTRUCCIONES DE FORMATO:
 - Tono: Profesional, moderno, tecnológico. Que suene innovador y confiable.
 - Largo: 3-4 párrafos máximo. Conciso pero contundente.
 - Menciona al menos 1 ventaja competitiva única (rastreo GPS en tiempo real, cotizador automático).
-- Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://pg-logistics.vercel.app/`;
+- Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://ponces-logistics.com/`;
     }
 
     const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
