@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Truck } from 'lucide-react';
+import posthog from 'posthog-js';
 
 const QUICK_OPTIONS = [
   { label: '📦 Rastrear envío', message: 'Quiero rastrear mi envío' },
@@ -28,6 +29,8 @@ export default function Chatbot() {
     if (e) e.preventDefault();
     const text = overrideText || input.trim();
     if (!text || isLoading) return;
+
+    posthog.capture('chatbot_message_sent', { is_quick_option: !!overrideText });
 
     const userMessage = { role: 'user', content: text };
     const newMessages = [...messages, userMessage];
@@ -65,7 +68,7 @@ export default function Chatbot() {
       {!isOpen && (
         <button 
           className="chatbot-toggle"
-          onClick={() => setIsOpen(true)}
+          onClick={() => { setIsOpen(true); posthog.capture('chatbot_opened'); }}
           aria-label="Abrir chat de servicio al cliente"
         >
           <MessageSquare size={24} />

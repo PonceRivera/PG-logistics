@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../lib/AuthContext';
 import { AlertCircle, LogIn } from 'lucide-react';
+import posthog from 'posthog-js';
 
 export default function LoginPage() {
   const { signIn, isConfigured } = useAuth();
@@ -19,6 +20,9 @@ export default function LoginPage() {
       setError(err.message === 'Invalid login credentials'
         ? 'Correo o contraseña incorrectos.'
         : err.message);
+      posthog.capture('admin_login_failed');
+    } else {
+      posthog.capture('admin_logged_in');
     }
 
     setLoading(false);

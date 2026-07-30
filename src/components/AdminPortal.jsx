@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, DollarSign, Truck, TrendingUp, Clock, Send, Shield, Mail, Trash2 } from 'lucide-react';
+import posthog from 'posthog-js';
 
 export default function AdminPortal({ quotes, onUpdateQuote, onDeleteQuote, carriers, onAddCarrier }) {
   const [pricingQuote, setPricingQuote] = useState(null);
@@ -37,7 +38,17 @@ export default function AdminPortal({ quotes, onUpdateQuote, onDeleteQuote, carr
   const savePricing = () => {
     const cost = Number(carrierCost) || 0;
     const margin = Number(marginPct) || 0;
-    onUpdateQuote({ ...pricingQuote, carrierCost: cost, marginPercent: margin, finalPrice: Math.round(cost * (1 + margin / 100)), status: 'CONFIRMADO' });
+    const finalPrice = Math.round(cost * (1 + margin / 100));
+    onUpdateQuote({ ...pricingQuote, carrierCost: cost, marginPercent: margin, finalPrice, status: 'CONFIRMADO' });
+    posthog.capture('quote_pricing_saved', {
+      folio: pricingQuote.id,
+      origin: pricingQuote.origin,
+      destination: pricingQuote.destination,
+      unit_type: pricingQuote.unitType,
+      carrier_cost: cost,
+      margin_percent: margin,
+      final_price: finalPrice,
+    });
     setPricingQuote(null);
   };
 
@@ -54,6 +65,12 @@ export default function AdminPortal({ quotes, onUpdateQuote, onDeleteQuote, carr
 
   const saveDispatch = () => {
     onUpdateQuote({ ...dispatchQuote, driverName, truckPlate, currentLocation: location, eta, status, trackingHistory });
+    posthog.capture('quote_dispatched', {
+      folio: dispatchQuote.id,
+      status,
+      origin: dispatchQuote.origin,
+      destination: dispatchQuote.destination,
+    });
     setDispatchQuote(null);
   };
 
@@ -81,6 +98,10 @@ export default function AdminPortal({ quotes, onUpdateQuote, onDeleteQuote, carr
       insuranceValid: true,
       gpsActive: true,
       rating: 5.0
+    });
+    posthog.capture('carrier_added', {
+      base_city: nc.baseCity,
+      unit_count: nc.units.split(',').length,
     });
     setShowCarrierModal(false);
     setNc({ companyName: '', baseCity: '', units: '', contactName: '', phone: '', sctPermit: '' });
@@ -216,7 +237,7 @@ export default function AdminPortal({ quotes, onUpdateQuote, onDeleteQuote, carr
                             <Mail size={14} />
                           </a>
                         )}
-                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => { if(window.confirm('¿Seguro que deseas eliminar este pedido?')) onDeleteQuote(q.id); }} title="Eliminar pedido">
+                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => { if(window.confirm('¿Seguro que deseas eliminar este pedido?')) { posthog.capture('quote_deleted', { folio: q.id, origin: q.origin, destination: q.destination }); onDeleteQuote(q.id); } }} title="Eliminar pedido">
                           <Trash2 size={14} />
                         </button>
                       </div>

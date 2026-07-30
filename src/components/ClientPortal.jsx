@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, CheckCircle2, ArrowRight, AlertCircle, Mail } from 'lucide-react';
 import { HUBS, UNIT_TYPES } from '../mockData';
 import { fetchQuoteByFolio } from '../lib/database';
+import posthog from 'posthog-js';
 
 export default function ClientPortal({ activeTab, setActiveTab, setActiveMode, quotes, onNewQuote }) {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -60,6 +61,15 @@ export default function ClientPortal({ activeTab, setActiveTab, setActiveMode, q
 
     onNewQuote(newQuoteObj);
     setSubmittedQuote(newQuoteObj);
+
+    posthog.capture('quote_submitted', {
+      folio: newQuoteObj.id,
+      origin: newQuoteObj.origin,
+      destination: newQuoteObj.destination,
+      unit_type: newQuoteObj.unitType,
+      cargo_type: newQuoteObj.cargoType,
+      weight_ton: newQuoteObj.weightTon,
+    });
   };
 
   const handleTrackSubmit = async (e) => {
@@ -68,11 +78,22 @@ export default function ClientPortal({ activeTab, setActiveTab, setActiveMode, q
     setTrackedShipment(null);
     try {
       const found = await fetchQuoteByFolio(searchFolio.trim());
-      if (found) { setTrackedShipment(found); }
-      else { setTrackError(true); }
+      if (found) {
+        setTrackedShipment(found);
+        posthog.capture('shipment_tracked', {
+          folio: found.id,
+          status: found.status,
+          origin: found.origin,
+          destination: found.destination,
+        });
+      } else {
+        setTrackError(true);
+        posthog.capture('shipment_track_failed', { folio: searchFolio.trim() });
+      }
     } catch (err) {
       console.error('Track error:', err);
       setTrackError(true);
+      posthog.capture('shipment_track_failed', { folio: searchFolio.trim() });
     }
   };
 
