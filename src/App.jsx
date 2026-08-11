@@ -171,13 +171,13 @@ function AppContent() {
       )}
 
       {activeMode === 'admin' && !showLogin && activeTab === 'admin-monitor' && (
-        <main className="main-content">
+        <main className="page-content">
           <AnalyticsDashboard />
         </main>
       )}
 
       {activeMode === 'admin' && !showLogin && activeTab === 'admin-security' && (
-        <main className="main-content">
+        <main className="page-content">
           <SecurityDashboard />
         </main>
       )}
