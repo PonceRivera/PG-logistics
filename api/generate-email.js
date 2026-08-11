@@ -38,13 +38,17 @@ CONTEXTO DE QUIÉN ENVÍA:
 OBJETIVO DEL CORREO:
 - Proponerles una alianza comercial donde GP Logistics les asigne cargas/viajes de nuestros clientes.
 - Queremos saber sus tarifas base, disponibilidad de unidades (cajas secas, plataformas) y requisitos para darlos de alta como proveedor.
-- Pedir una llamada breve o respuesta por correo.
+
+REGLAS OBLIGATORIAS:
+- NUNCA propongas llamadas telefónicas, sesiones, videollamadas, reuniones presenciales ni agendar citas.
+- Toda comunicación debe ser por CORREO ELECTRÓNICO únicamente.
+- En lugar de "agendemos una llamada" usa frases como: "quedo al pendiente de su respuesta por este medio" o "le agradezco me comparta la información vía correo".
+- NO uses palabras como "intermediario" o "comisionista", usa "agencia integradora" o "brazo comercial".
 
 INSTRUCCIONES DE FORMATO:
 - Genera SOLO el cuerpo del correo (sin "Asunto:" ni etiquetas).
 - Tono: Muy profesional, corporativo, confiable. Que suene como una empresa grande.
 - Largo: 3-4 párrafos máximo. Conciso pero contundente.
-- NO uses palabras como "intermediario" o "comisionista", usa "agencia integradora" o "brazo comercial".
 - Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://ponces-logistics.com/`;
     } else {
       prompt = `Genera un correo electrónico profesional de ventas B2B en español para enviar a una empresa manufacturera o comercial que podría necesitar servicios de transporte de carga.
@@ -68,7 +72,11 @@ OBJETIVO DEL CORREO:
 - Presentar GP Logistics como proveedor de servicios de transporte terrestre.
 - Destacar nuestra tecnología (plataforma digital, rastreo GPS, cotizador con IA).
 - Ofrecer una cotización sin compromiso para sus próximos embarques.
-- Solicitar una llamada o reunión breve.
+
+REGLAS OBLIGATORIAS:
+- NUNCA propongas llamadas telefónicas, sesiones, videollamadas, reuniones presenciales ni agendar citas.
+- Toda comunicación debe ser por CORREO ELECTRÓNICO únicamente.
+- En lugar de "agendemos una llamada" usa frases como: "quedo al pendiente de su respuesta por este medio" o "con gusto le enviamos una cotización por correo".
 
 INSTRUCCIONES DE FORMATO:
 - Genera SOLO el cuerpo del correo (sin "Asunto:" ni etiquetas).

@@ -49,6 +49,11 @@ OBJETIVO:
 - Proponerles alianza comercial.
 - Queremos saber sus tarifas base y disponibilidad de unidades (cajas secas, plataformas).
 
+REGLAS OBLIGATORIAS:
+- NUNCA propongas llamadas telefónicas, sesiones, videollamadas, reuniones presenciales ni agenda una cita.
+- Toda comunicación debe ser por CORREO ELECTRÓNICO únicamente.
+- En lugar de "agendemos una llamada" usa frases como: "quedo al pendiente de su respuesta por este medio" o "le agradezco me comparta la información vía correo".
+
 INSTRUCCIONES DE FORMATO:
 - Genera SOLO el cuerpo del correo.
 - Tono: Muy profesional.
@@ -71,6 +76,11 @@ CONTEXTO DE QUIÉN ENVÍA:
 OBJETIVO:
 - Presentar GP Logistics.
 - Ofrecer una cotización sin compromiso para sus embarques.
+
+REGLAS OBLIGATORIAS:
+- NUNCA propongas llamadas telefónicas, sesiones, videollamadas, reuniones presenciales ni agenda una cita.
+- Toda comunicación debe ser por CORREO ELECTRÓNICO únicamente.
+- En lugar de "agendemos una llamada" usa frases como: "quedo al pendiente de su respuesta por este medio" o "con gusto le enviamos una cotización por correo".
 
 INSTRUCCIONES DE FORMATO:
 - Genera SOLO el cuerpo del correo.
