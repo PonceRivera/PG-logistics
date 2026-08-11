@@ -96,17 +96,7 @@ export default function SecurityDashboard() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
       
       {/* Top Banner Status */}
-      <div style={{
-        background: statusBg,
-        border: `1px solid ${statusBorder}`,
-        borderRadius: 'var(--radius-lg)',
-        padding: '1.25rem 1.5rem',
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1rem'
-      }}>
+      <div className="dash-header" style={{ background: statusBg, borderColor: statusBorder }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
           <StatusIcon size={32} color={statusColor} />
           <div>
@@ -153,120 +143,52 @@ export default function SecurityDashboard() {
       </div>
 
       {/* KPI Cards Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '1rem'
-      }}>
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
+      <div className="dash-kpi-grid">
+        <div className="dash-kpi-card">
           <div>
             <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', fontWeight: 600 }}>Amenazas Detectadas</p>
-            <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', marginTop: '0.2rem', display: 'block' }}>
+            <span className="dash-kpi-val" style={{ color: '#ffffff' }}>
               {securityEvents.length}
             </span>
           </div>
-          <div style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.2)',
-            padding: '0.75rem',
-            borderRadius: 'var(--radius-md)',
-            color: '#ef4444'
-          }}>
+          <div className="dash-kpi-icon" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444' }}>
             <AlertTriangle size={22} />
           </div>
         </div>
 
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
+        <div className="dash-kpi-card">
           <div>
             <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', fontWeight: 600 }}>IPs Bloqueadas</p>
-            <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f59e0b', marginTop: '0.2rem', display: 'block' }}>
+            <span className="dash-kpi-val" style={{ color: '#f59e0b' }}>
               {blockedIps.length}
             </span>
           </div>
-          <div style={{
-            background: 'rgba(245, 158, 11, 0.1)',
-            border: '1px solid rgba(245, 158, 11, 0.2)',
-            padding: '0.75rem',
-            borderRadius: 'var(--radius-md)',
-            color: '#f59e0b'
-          }}>
+          <div className="dash-kpi-icon" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#f59e0b' }}>
             <Ban size={22} />
           </div>
         </div>
 
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
+        <div className="dash-kpi-card">
           <div>
             <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', fontWeight: 600 }}>Protección de API</p>
-            <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#22c55e', marginTop: '0.2rem', display: 'block' }}>
+            <span className="dash-kpi-val" style={{ color: '#22c55e', fontSize: '1.4rem' }}>
               100% ACTIVA
             </span>
           </div>
-          <div style={{
-            background: 'rgba(34, 197, 94, 0.1)',
-            border: '1px solid rgba(34, 197, 94, 0.2)',
-            padding: '0.75rem',
-            borderRadius: 'var(--radius-md)',
-            color: '#22c55e'
-          }}>
+          <div className="dash-kpi-icon" style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', color: '#22c55e' }}>
             <Lock size={22} />
           </div>
         </div>
       </div>
 
       {/* Main Grid: IP Blacklist & Threat Feed */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)',
-        gap: '1.5rem',
-        width: '100%'
-      }}>
+      <div className="dash-main-grid">
         {/* Left Column: Blacklist & Block IP */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
           {/* Form to Manual Block IP */}
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '1.25rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.85rem'
-          }}>
-            <h3 style={{
-              fontSize: '0.95rem',
-              fontWeight: 600,
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              paddingBottom: '0.75rem',
-              borderBottom: '1px solid var(--border)'
-            }}>
+          <div className="dash-panel">
+            <h3 className="dash-panel-title">
               <Ban size={16} color="#ef4444" /> Bloquear Dirección IP
             </h3>
 
@@ -341,29 +263,12 @@ export default function SecurityDashboard() {
           </div>
 
           {/* List of Blocked IPs */}
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '1.25rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.85rem'
-          }}>
-            <h3 style={{
-              fontSize: '0.95rem',
-              fontWeight: 600,
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              paddingBottom: '0.75rem',
-              borderBottom: '1px solid var(--border)'
-            }}>
+          <div className="dash-panel">
+            <h3 className="dash-panel-title">
               <Lock size={16} color="#f59e0b" /> Lista Negra de IPs ({blockedIps.length})
             </h3>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '300px', overflowY: 'auto' }}>
+            <div className="dash-list" style={{ maxHeight: '300px' }}>
               {blockedIps.length === 0 ? (
                 <p style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem', textAlign: 'center', padding: '1.5rem 0' }}>
                   No hay IPs en la lista negra.
@@ -417,29 +322,12 @@ export default function SecurityDashboard() {
         </div>
 
         {/* Right Column: Security Incident Stream */}
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.25rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem'
-        }}>
-          <h3 style={{
-            fontSize: '0.95rem',
-            fontWeight: 600,
-            color: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            paddingBottom: '0.75rem',
-            borderBottom: '1px solid var(--border)'
-          }}>
+        <div className="dash-panel">
+          <h3 className="dash-panel-title">
             <Terminal size={16} color="#22c55e" /> Registro de Amenazas e Incidentes
           </h3>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', maxHeight: '540px', overflowY: 'auto' }}>
+          <div className="dash-list" style={{ maxHeight: '540px' }}>
             {securityEvents.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
                 <CheckCircle size={32} color="#22c55e" style={{ margin: '0 auto 0.5rem', opacity: 0.6 }} />
@@ -462,29 +350,13 @@ export default function SecurityDashboard() {
                 }
 
                 return (
-                  <div
-                    key={ev.id || idx}
-                    style={{
-                      background: 'var(--bg-surface)',
-                      border: '1px solid var(--border)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '0.85rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.4rem'
-                    }}
-                  >
+                  <div key={ev.id || idx} className="dash-item">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{
+                        <span className="dash-badge" style={{
                           background: badgeBg,
                           color: badgeColor,
-                          border: `1px solid ${badgeBorder}`,
-                          padding: '0.1rem 0.45rem',
-                          borderRadius: '4px',
-                          fontSize: '0.65rem',
-                          fontWeight: 700,
-                          textTransform: 'uppercase'
+                          border: `1px solid ${badgeBorder}`
                         }}>
                           {ev.severity || 'low'}
                         </span>
@@ -503,17 +375,7 @@ export default function SecurityDashboard() {
                     </div>
 
                     {ev.details && (
-                      <div style={{
-                        background: '#090909',
-                        border: '1px solid #1f1f1f',
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: '4px',
-                        fontSize: '0.72rem',
-                        fontFamily: 'monospace',
-                        color: '#f59e0b',
-                        overflowX: 'auto',
-                        marginTop: '0.2rem'
-                      }}>
+                      <div className="dash-json-box">
                         {JSON.stringify(ev.details, null, 2)}
                       </div>
                     )}

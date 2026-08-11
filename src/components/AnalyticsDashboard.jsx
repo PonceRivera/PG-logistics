@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Users, Activity, Globe, Eye, MousePointer, 
-  Clock, RefreshCw, Laptop, Smartphone, Search, ChevronRight, CornerDownRight
+  Clock, RefreshCw, Laptop, Smartphone, Search
 } from 'lucide-react';
 import { fetchAnalyticsEvents } from '../lib/database';
 
@@ -96,17 +96,7 @@ export default function AnalyticsDashboard() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
       
       {/* Top Controls Header */}
-      <div style={{
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '1.25rem 1.5rem',
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1rem'
-      }}>
+      <div className="dash-header">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <span style={{
@@ -158,155 +148,73 @@ export default function AnalyticsDashboard() {
       </div>
 
       {/* KPI Cards Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '1rem'
-      }}>
+      <div className="dash-kpi-grid">
         {/* Card 1 */}
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
+        <div className="dash-kpi-card">
           <div>
             <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', fontWeight: 600 }}>Activos Ahora</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.3rem' }}>
-              <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#22c55e' }}>{activeNowCount}</span>
+              <span className="dash-kpi-val" style={{ color: '#22c55e' }}>{activeNowCount}</span>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>últimos 5m</span>
             </div>
           </div>
-          <div style={{
-            background: 'rgba(34, 197, 94, 0.1)',
-            border: '1px solid rgba(34, 197, 94, 0.2)',
-            padding: '0.75rem',
-            borderRadius: 'var(--radius-md)',
-            color: '#22c55e'
-          }}>
+          <div className="dash-kpi-icon" style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', color: '#22c55e' }}>
             <Users size={22} />
           </div>
         </div>
 
         {/* Card 2 */}
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
+        <div className="dash-kpi-card">
           <div>
             <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', fontWeight: 600 }}>Sesiones Únicas</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.3rem' }}>
-              <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff' }}>{uniqueSessions}</span>
+              <span className="dash-kpi-val" style={{ color: '#ffffff' }}>{uniqueSessions}</span>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>totales</span>
             </div>
           </div>
-          <div style={{
-            background: 'rgba(96, 165, 250, 0.1)',
-            border: '1px solid rgba(96, 165, 250, 0.2)',
-            padding: '0.75rem',
-            borderRadius: 'var(--radius-md)',
-            color: '#60a5fa'
-          }}>
+          <div className="dash-kpi-icon" style={{ background: 'rgba(96, 165, 250, 0.1)', border: '1px solid rgba(96, 165, 250, 0.2)', color: '#60a5fa' }}>
             <Globe size={22} />
           </div>
         </div>
 
         {/* Card 3 */}
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
+        <div className="dash-kpi-card">
           <div>
             <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', fontWeight: 600 }}>Vistas de Página</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.3rem' }}>
-              <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff' }}>{pageViews}</span>
+              <span className="dash-kpi-val" style={{ color: '#ffffff' }}>{pageViews}</span>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>cargas</span>
             </div>
           </div>
-          <div style={{
-            background: 'rgba(168, 85, 247, 0.1)',
-            border: '1px solid rgba(168, 85, 247, 0.2)',
-            padding: '0.75rem',
-            borderRadius: 'var(--radius-md)',
-            color: '#a855f7'
-          }}>
+          <div className="dash-kpi-icon" style={{ background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.2)', color: '#a855f7' }}>
             <Eye size={22} />
           </div>
         </div>
 
         {/* Card 4 */}
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
+        <div className="dash-kpi-card">
           <div>
             <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', fontWeight: 600 }}>Interacciones</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.3rem' }}>
-              <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#f59e0b' }}>{clickEvents + formSubmits}</span>
+              <span className="dash-kpi-val" style={{ color: '#f59e0b' }}>{clickEvents + formSubmits}</span>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>clics y envíos</span>
             </div>
           </div>
-          <div style={{
-            background: 'rgba(245, 158, 11, 0.1)',
-            border: '1px solid rgba(245, 158, 11, 0.2)',
-            padding: '0.75rem',
-            borderRadius: 'var(--radius-md)',
-            color: '#f59e0b'
-          }}>
+          <div className="dash-kpi-icon" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#f59e0b' }}>
             <MousePointer size={22} />
           </div>
         </div>
       </div>
 
       {/* Main Grid: Sessions & Event Feed */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)',
-        gap: '1.5rem',
-        width: '100%'
-      }}>
+      <div className="dash-main-grid">
         {/* Left Column: Sessions List */}
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.25rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem'
-        }}>
-          <h3 style={{
-            fontSize: '0.95rem',
-            fontWeight: 600,
-            color: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            paddingBottom: '0.75rem',
-            borderBottom: '1px solid var(--border)'
-          }}>
-            <Users size={16} color="#22c55e" /> Sesiones de Visitantes ({sessionList.length})
+        <div className="dash-panel">
+          <h3 className="dash-panel-title">
+            <Users size={16} color="#22c55e" /> Sesiones ({sessionList.length})
           </h3>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '520px', overflowY: 'auto' }}>
+          <div className="dash-list">
             {sessionList.length === 0 ? (
               <p style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem', textAlign: 'center', padding: '2rem 0' }}>
                 Esperando visitantes...
@@ -360,15 +268,7 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Right Column: Event Feed Stream */}
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.25rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem'
-        }}>
+        <div className="dash-panel">
           {/* Header & Filters */}
           <div style={{
             display: 'flex',
@@ -391,11 +291,11 @@ export default function AnalyticsDashboard() {
                 onClick={() => setSelectedSession(null)}
                 style={{ background: 'none', border: 'none', color: '#22c55e', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}
               >
-                Ver todos los eventos
+                Ver todos
               </button>
             )}
 
-            <div style={{ display: 'flex', items: 'center', gap: '0.5rem', marginLeft: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: 'auto' }}>
               <div style={{ position: 'relative' }}>
                 <Search size={13} style={{ position: 'absolute', left: '8px', top: '9px', color: 'var(--text-tertiary)' }} />
                 <input
@@ -411,7 +311,7 @@ export default function AnalyticsDashboard() {
                     padding: '0.35rem 0.6rem 0.35rem 1.7rem',
                     borderRadius: 'var(--radius-md)',
                     outline: 'none',
-                    width: '160px'
+                    width: '150px'
                   }}
                 />
               </div>
@@ -438,7 +338,7 @@ export default function AnalyticsDashboard() {
           </div>
 
           {/* Stream of Events */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '520px', overflowY: 'auto' }}>
+          <div className="dash-list">
             {activeEventsList.length === 0 ? (
               <p style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem', textAlign: 'center', padding: '3rem 0' }}>
                 No se encontraron eventos coincidentes.
@@ -462,29 +362,13 @@ export default function AnalyticsDashboard() {
                 }
 
                 return (
-                  <div
-                    key={ev.id || idx}
-                    style={{
-                      background: 'var(--bg-surface)',
-                      border: '1px solid var(--border)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '0.85rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.4rem'
-                    }}
-                  >
+                  <div key={ev.id || idx} className="dash-item">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{
+                        <span className="dash-badge" style={{
                           background: badgeBg,
                           color: badgeColor,
-                          border: `1px solid ${badgeBorder}`,
-                          padding: '0.1rem 0.4rem',
-                          borderRadius: '4px',
-                          fontSize: '0.65rem',
-                          fontWeight: 700,
-                          textTransform: 'uppercase'
+                          border: `1px solid ${badgeBorder}`
                         }}>
                           {ev.event_type}
                         </span>
@@ -509,17 +393,7 @@ export default function AnalyticsDashboard() {
 
                     {/* Data JSON preview if form or details */}
                     {ev.event_data && Object.keys(ev.event_data).length > 0 && (
-                      <div style={{
-                        background: '#090909',
-                        border: '1px solid #1f1f1f',
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: '4px',
-                        fontSize: '0.72rem',
-                        fontFamily: 'monospace',
-                        color: '#4ade80',
-                        overflowX: 'auto',
-                        marginTop: '0.2rem'
-                      }}>
+                      <div className="dash-json-box">
                         {JSON.stringify(ev.event_data)}
                       </div>
                     )}
