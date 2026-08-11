@@ -1,5 +1,5 @@
 import React from 'react';
-import { Truck, LogOut } from 'lucide-react';
+import { Truck, LogOut, ShieldAlert } from 'lucide-react';
 
 export default function Navbar({ activeMode, setActiveMode, activeTab, setActiveTab, user, onSignOut }) {
 
@@ -14,6 +14,8 @@ export default function Navbar({ activeMode, setActiveMode, activeTab, setActive
   const adminTabs = [
     { id: 'admin-dashboard', label: 'Operaciones' },
     { id: 'admin-emails', label: 'Prospección IA' },
+    { id: 'admin-monitor', label: 'Monitor' },
+    { id: 'admin-security', label: 'Seguridad' },
   ];
 
   const tabs = activeMode === 'client' ? clientTabs : (user ? adminTabs : []);

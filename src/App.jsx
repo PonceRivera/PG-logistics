@@ -10,6 +10,8 @@ import Footer from './components/Footer';
 import Chatbot from './components/Chatbot';
 import TrackingMap from './components/TrackingMap';
 import EmailProspector from './components/EmailProspector';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
+import SecurityDashboard from './components/SecurityDashboard';
 
 function AppContent() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -105,7 +107,6 @@ function AppContent() {
     setActiveMode(mode);
     if (mode === 'admin') {
       setActiveTab('admin-dashboard');
-      // Reload data when entering admin (may need fresh carriers)
       loadData();
     } else {
       setActiveTab('inicio');
@@ -167,6 +168,18 @@ function AppContent() {
 
       {activeMode === 'admin' && !showLogin && activeTab === 'admin-emails' && (
         <EmailProspector />
+      )}
+
+      {activeMode === 'admin' && !showLogin && activeTab === 'admin-monitor' && (
+        <main className="main-content">
+          <AnalyticsDashboard />
+        </main>
+      )}
+
+      {activeMode === 'admin' && !showLogin && activeTab === 'admin-security' && (
+        <main className="main-content">
+          <SecurityDashboard />
+        </main>
       )}
 
       {activeMode === 'legal' && (

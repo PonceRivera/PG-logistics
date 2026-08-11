@@ -86,7 +86,6 @@ export async function deleteQuote(id) {
   if (error) throw error;
 }
 
-// Map DB snake_case → JS camelCase
 function mapQuoteFromDb(row) {
   return {
     id: row.id,
@@ -117,7 +116,6 @@ function mapQuoteFromDb(row) {
   };
 }
 
-// Map JS camelCase → DB snake_case
 function mapQuoteToDb(quote) {
   return {
     id: quote.id,
@@ -210,4 +208,171 @@ function mapCarrierToDb(carrier) {
     gps_active: carrier.gpsActive ?? true,
     rating: carrier.rating ?? 5.0
   };
+}
+
+// ============================================================
+// ANALYTICS & SECURITY
+// ============================================================
+
+export async function fetchAnalyticsEvents() {
+  if (!isSupabaseConfigured) {
+    const saved = localStorage.getItem('gpl_analytics_events');
+    return saved ? JSON.parse(saved) : [];
+  }
+  const { data, error } = await supabase
+    .from('analytics_events')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(500);
+  if (error) {
+    console.warn('Supabase analytics fetch warning:', error.message);
+    const saved = localStorage.getItem('gpl_analytics_events');
+    return saved ? JSON.parse(saved) : [];
+  }
+  return data || [];
+}
+
+export async function recordAnalyticsEvent(event) {
+  const localSaved = localStorage.getItem('gpl_analytics_events');
+  const events = localSaved ? JSON.parse(localSaved) : [];
+  const fullEvent = {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    session_id: event.sessionId,
+    event_type: event.eventType,
+    event_data: event.eventData || {},
+    ip_address: event.ipAddress || '187.190.44.12',
+    country: event.country || 'México',
+    city: event.city || 'Monterrey',
+    device: event.device || 'Desktop',
+    browser: event.browser || 'Chrome',
+    referrer: event.referrer || '',
+    created_at: new Date().toISOString()
+  };
+  events.unshift(fullEvent);
+  if (events.length > 300) events.length = 300;
+  localStorage.setItem('gpl_analytics_events', JSON.stringify(events));
+
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('analytics_events').insert({
+        session_id: fullEvent.session_id,
+        event_type: fullEvent.event_type,
+        event_data: fullEvent.event_data,
+        ip_address: fullEvent.ip_address,
+        country: fullEvent.country,
+        city: fullEvent.city,
+        device: fullEvent.device,
+        browser: fullEvent.browser,
+        referrer: fullEvent.referrer
+      });
+    } catch (e) {
+      console.warn('Analytics insert error:', e);
+    }
+  }
+  return fullEvent;
+}
+
+export async function fetchSecurityEvents() {
+  if (!isSupabaseConfigured) {
+    const saved = localStorage.getItem('gpl_security_events');
+    return saved ? JSON.parse(saved) : [];
+  }
+  const { data, error } = await supabase
+    .from('security_events')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(200);
+  if (error) {
+    console.warn('Supabase security fetch warning:', error.message);
+    const saved = localStorage.getItem('gpl_security_events');
+    return saved ? JSON.parse(saved) : [];
+  }
+  return data || [];
+}
+
+export async function recordSecurityEvent(event) {
+  const localSaved = localStorage.getItem('gpl_security_events');
+  const events = localSaved ? JSON.parse(localSaved) : [];
+  const fullEvent = {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    event_type: event.eventType,
+    ip_address: event.ipAddress || 'Unknown',
+    details: event.details || {},
+    severity: event.severity || 'low',
+    resolved: false,
+    created_at: new Date().toISOString()
+  };
+  events.unshift(fullEvent);
+  if (events.length > 200) events.length = 200;
+  localStorage.setItem('gpl_security_events', JSON.stringify(events));
+
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('security_events').insert({
+        event_type: fullEvent.event_type,
+        ip_address: fullEvent.ip_address,
+        details: fullEvent.details,
+        severity: fullEvent.severity
+      });
+    } catch (e) {
+      console.warn('Security event insert error:', e);
+    }
+  }
+  return fullEvent;
+}
+
+export async function fetchBlockedIps() {
+  if (!isSupabaseConfigured) {
+    const saved = localStorage.getItem('gpl_blocked_ips');
+    return saved ? JSON.parse(saved) : [];
+  }
+  const { data, error } = await supabase
+    .from('blocked_ips')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) {
+    const saved = localStorage.getItem('gpl_blocked_ips');
+    return saved ? JSON.parse(saved) : [];
+  }
+  return data || [];
+}
+
+export async function blockIp(ipAddress, reason = 'Bloqueado por Administrador') {
+  const localSaved = localStorage.getItem('gpl_blocked_ips');
+  const list = localSaved ? JSON.parse(localSaved) : [];
+  if (!list.find(item => item.ip_address === ipAddress)) {
+    list.unshift({
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+      ip_address: ipAddress,
+      reason,
+      created_at: new Date().toISOString()
+    });
+    localStorage.setItem('gpl_blocked_ips', JSON.stringify(list));
+  }
+
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('blocked_ips').insert({
+        ip_address: ipAddress,
+        reason
+      });
+    } catch (e) {
+      console.warn('Block IP error:', e);
+    }
+  }
+}
+
+export async function unblockIp(ipAddress) {
+  const localSaved = localStorage.getItem('gpl_blocked_ips');
+  const list = localSaved ? JSON.parse(localSaved) : [];
+  const filtered = list.filter(item => item.ip_address !== ipAddress);
+  localStorage.setItem('gpl_blocked_ips', JSON.stringify(filtered));
+
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('blocked_ips').delete().eq('ip_address', ipAddress);
+    } catch (e) {
+      console.warn('Unblock IP error:', e);
+    }
+  }
 }

@@ -46,50 +46,75 @@ create table if not exists carriers (
   created_at timestamptz default now()
 );
 
+-- Tabla: Eventos de Analíticas
+create table if not exists analytics_events (
+  id uuid primary key default gen_random_uuid(),
+  session_id text not null,
+  event_type text not null,
+  event_data jsonb default '{}'::jsonb,
+  ip_address text default '127.0.0.1',
+  country text default 'Desconocido',
+  city text default 'Desconocido',
+  device text default 'desktop',
+  browser text default 'Desconocido',
+  referrer text default '',
+  created_at timestamptz default now()
+);
+
+-- Tabla: Eventos de Seguridad y Amenazas
+create table if not exists security_events (
+  id uuid primary key default gen_random_uuid(),
+  event_type text not null,
+  ip_address text not null,
+  details jsonb default '{}'::jsonb,
+  severity text default 'low',
+  resolved boolean default false,
+  created_at timestamptz default now()
+);
+
+-- Tabla: IPs Bloqueadas
+create table if not exists blocked_ips (
+  id uuid primary key default gen_random_uuid(),
+  ip_address text unique not null,
+  reason text default 'Fuerza bruta / Escaneo sospechoso',
+  blocked_until timestamptz,
+  created_at timestamptz default now()
+);
+
 -- ============================================================
 -- Row Level Security (RLS) — Permisos de acceso
 -- ============================================================
 
--- Activar RLS en ambas tablas
 alter table quotes enable row level security;
 alter table carriers enable row level security;
+alter table analytics_events enable row level security;
+alter table security_events enable row level security;
+alter table blocked_ips enable row level security;
 
--- QUOTES: Lectura pública (necesario para rastreo por folio)
-create policy "Lectura publica de cotizaciones"
-  on quotes for select
-  using (true);
+-- QUOTES Policies
+create policy "Lectura publica de cotizaciones" on quotes for select using (true);
+create policy "Clientes pueden crear cotizaciones" on quotes for insert with check (true);
+create policy "Admin puede actualizar cotizaciones" on quotes for update using (auth.role() = 'authenticated');
+create policy "Admin puede eliminar cotizaciones" on quotes for delete using (auth.role() = 'authenticated');
 
--- QUOTES: Inserción pública (clientes pueden enviar solicitudes)
-create policy "Clientes pueden crear cotizaciones"
-  on quotes for insert
-  with check (true);
+-- CARRIERS Policies
+create policy "Admin puede ver transportistas" on carriers for select using (auth.role() = 'authenticated');
+create policy "Admin puede crear transportistas" on carriers for insert with check (auth.role() = 'authenticated');
+create policy "Admin puede actualizar transportistas" on carriers for update using (auth.role() = 'authenticated');
+create policy "Admin puede eliminar transportistas" on carriers for delete using (auth.role() = 'authenticated');
 
--- QUOTES: Solo admin puede actualizar (cambiar estatus, asignar tarifa)
-create policy "Admin puede actualizar cotizaciones"
-  on quotes for update
-  using (auth.role() = 'authenticated');
+-- ANALYTICS Policies
+create policy "Cualquiera puede registrar analiticas" on analytics_events for insert with check (true);
+create policy "Lectura de analiticas publica o admin" on analytics_events for select using (true);
 
--- QUOTES: Solo admin puede eliminar
-create policy "Admin puede eliminar cotizaciones"
-  on quotes for delete
-  using (auth.role() = 'authenticated');
+-- SECURITY Policies
+create policy "Cualquiera puede registrar eventos de seguridad" on security_events for insert with check (true);
+create policy "Lectura de seguridad publica o admin" on security_events for select using (true);
+create policy "Admin puede actualizar eventos de seguridad" on security_events for update using (true);
 
--- CARRIERS: Todo requiere autenticación (solo admin)
-create policy "Admin puede ver transportistas"
-  on carriers for select
-  using (auth.role() = 'authenticated');
-
-create policy "Admin puede crear transportistas"
-  on carriers for insert
-  with check (auth.role() = 'authenticated');
-
-create policy "Admin puede actualizar transportistas"
-  on carriers for update
-  using (auth.role() = 'authenticated');
-
-create policy "Admin puede eliminar transportistas"
-  on carriers for delete
-  using (auth.role() = 'authenticated');
+-- BLOCKED IPs Policies
+create policy "Lectura de IPs bloqueadas" on blocked_ips for select using (true);
+create policy "Modificar IPs bloqueadas" on blocked_ips for all using (true);
 
 -- ============================================================
 -- Datos iniciales de ejemplo (opcional)
