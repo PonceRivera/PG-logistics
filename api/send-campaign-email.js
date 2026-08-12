@@ -28,8 +28,9 @@ export default async function handler(req, res) {
     if (!apiKey) return res.status(500).json({ error: 'Falta la API Key de NVIDIA.' });
     if (!smtpUser || !smtpPass) return res.status(500).json({ error: 'Falta configuración SMTP (SMTP_USER, SMTP_PASS).' });
 
-    // 1. Generate Email Content with NVIDIA
+    // 1. Generate High-Conversion Email Content with NVIDIA
     let prompt = '';
+    
     if (companyType === 'fletera') {
       prompt = `Genera un correo electrónico profesional de ventas B2B en español para enviar a una empresa de transporte/fletera.
 DATOS:
@@ -57,35 +58,64 @@ REGLAS OBLIGATORIAS:
 INSTRUCCIONES DE FORMATO:
 - Genera SOLO el cuerpo del correo.
 - Tono: Muy profesional.
-- Largo: 3-4 párrafos máximo.
+- Largo: 3 párrafos máximo.
 - Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://ponces-logistics.com/`;
-    } else {
-      prompt = `Genera un correo electrónico profesional de ventas B2B en español para enviar a una empresa manufacturera o comercial.
+    } else if (companyType === 'cliente_followup') {
+      prompt = `Genera un correo de SEGUIMIENTO (Follow-up) corto y muy cortés de ventas B2B en español para un cliente potencial manufacturero o comercial que no ha respondido al correo anterior.
+
 DATOS:
 - Empresa destino: ${companyName}
-- Contacto: ${contactName || 'Gerente de Logística/Tráfico'}
-- Notas adicionales: ${notes || 'Ninguna'}
+- Contacto: ${contactName || 'Gerente de Logística'}
+
+CONTEXTO:
+- Empresa: GP Logistics
+- Director Comercial: Christopher Ponce Rivera
+- Web: https://ponces-logistics.com/
+
+OBJETIVO DEL SEGUIMIENTO:
+- Breve recordatorio de 2 párrafos máximo.
+- Preguntar si tienen alguna ruta activa esta semana saliendo de Monterrey, Saltillo, Ramos Arizpe, Guadalajara, CDMX o Laredo donde requieran unidades de respaldo (caja seca 40/53', plataformas, rabones) o quieran comparar tarifas con su flete actual.
+- Cierre sin fricción: "¿Les serviría que les enviemos una cotización comparativa sin compromiso por este medio?"
+
+REGLAS OBLIGATORIAS:
+- NUNCA propongas llamadas telefónicas, sesiones, videollamadas ni citas presenciales.
+- Toda comunicación por correo electrónico únicamente.
+
+INSTRUCCIONES DE FORMATO:
+- Genera SOLO el cuerpo del correo.
+- Tono: Muy amable, directo, breve (máximo 2 párrafos).
+- Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://ponces-logistics.com/`;
+    } else {
+      // CLIENTE PRIMER CONTACTO - ALTO GANCHO DE CONVERSIÓN
+      prompt = `Genera un correo de ventas B2B de ALTO GANCHO DE CONVERSIÓN en español para enviar a un Gerente de Logística/Tráfico/Compras de una empresa manufacturera o comercial.
+
+DATOS:
+- Empresa destino: ${companyName}
+- Contacto: ${contactName || 'Gerente de Logística/Tráfico/Compras'}
+- Giro/Notas: ${notes || 'Sector industrial'}
 
 CONTEXTO DE QUIÉN ENVÍA:
 - Empresa: GP Logistics (Grupo Ponce Logistics)
 - Director Comercial: Christopher Ponce Rivera
 - Web: https://ponces-logistics.com/
-- Correo: contacto@grupoponcelogistics.com
-- Ofrecemos transporte terrestre con rastreo satelital en tiempo real, cotizador automático con IA.
 
-OBJETIVO:
-- Presentar GP Logistics.
-- Ofrecer una cotización sin compromiso para sus embarques.
+GANCHO Y PROPUESTA DE VALOR:
+- Atacar directamente el problema de disponibilidad de camiones y tarifas altas en rutas críticas.
+- Ofrecer solución: Unidades de respaldo con asignación garantizada (cajas secas 40 y 53', plataformas, rabones) con rastreo GPS en tiempo real en los corredores Monterrey, Saltillo, Ramos Arizpe, Laredo, CDMX y Guadalajara.
+- Garantizar cotización comparativa en menos de 15 minutos sin ningún compromiso.
+
+PREGUNTA DE CIERRE SIN FRICCIÓN:
+- Finaliza con la pregunta: "¿Tendrán alguna carga o ruta activa esta semana donde requieran una unidad de respaldo o les sirva recibir una cotización comparativa sin compromiso?"
 
 REGLAS OBLIGATORIAS:
-- NUNCA propongas llamadas telefónicas, sesiones, videollamadas, reuniones presenciales ni agenda una cita.
+- NUNCA propongas llamadas telefónicas, sesiones, videollamadas ni agendar citas.
 - Toda comunicación debe ser por CORREO ELECTRÓNICO únicamente.
-- En lugar de "agendemos una llamada" usa frases como: "quedo al pendiente de su respuesta por este medio" o "con gusto le enviamos una cotización por correo".
+- En lugar de "agendemos una llamada" usa siempre "quedo al pendiente de su respuesta por este medio".
 
 INSTRUCCIONES DE FORMATO:
-- Genera SOLO el cuerpo del correo.
-- Tono: Profesional, moderno.
-- Largo: 3-4 párrafos máximo.
+- Genera SOLO el cuerpo del correo (sin etiquetas de asunto dentro del texto).
+- Tono: Profesional, directo al grano, enfocado en solucionar problemas de transporte.
+- Largo: Máximo 2 a 3 párrafos cortos (menos de 120 palabras).
 - Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://ponces-logistics.com/`;
     }
 
@@ -95,9 +125,9 @@ INSTRUCCIONES DE FORMATO:
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'meta/llama-3.1-70b-instruct',
-        messages: [{ role: 'system', content: 'Eres un redactor B2B experto.' }, { role: 'user', content: prompt }],
-        temperature: 0.7,
-        max_tokens: 800,
+        messages: [{ role: 'system', content: 'Eres un redactor experto en correos fríos B2B de alta conversión para logística en México.' }, { role: 'user', content: prompt }],
+        temperature: 0.6,
+        max_tokens: 600,
       }),
     });
     if (!bodyRes.ok) throw new Error('Error generando cuerpo del correo');
@@ -105,9 +135,12 @@ INSTRUCCIONES DE FORMATO:
     const emailBody = bodyData.choices?.[0]?.message?.content || '';
 
     // Call NVIDIA for Subject
-    const subjectPrompt = companyType === 'fletera'
-      ? `Genera UN SOLO asunto de correo (máximo 10 palabras) para proponer alianza de transporte a "${companyName}". Solo el texto.`
-      : `Genera UN SOLO asunto de correo (máximo 10 palabras) para ofrecer transporte de carga a "${companyName}". Solo el texto.`;
+    let subjectPrompt = `Genera UN SOLO asunto de correo corto (máximo 8 palabras) enfocado en resolver fallas de flete a "${companyName}". Ejemplo: "Disponibilidad de fletes y unidades de respaldo en ${companyName}". Solo el texto.`;
+    if (companyType === 'fletera') {
+      subjectPrompt = `Genera UN SOLO asunto de correo (máximo 8 palabras) para proponer alianza de transporte a "${companyName}". Solo el texto.`;
+    } else if (companyType === 'cliente_followup') {
+      subjectPrompt = `Genera UN SOLO asunto de seguimiento corto tipo "Re: Fletes y unidades disponibles para ${companyName}". Solo el texto.`;
+    }
 
     const subRes = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
       method: 'POST',
@@ -120,23 +153,25 @@ INSTRUCCIONES DE FORMATO:
       }),
     });
     
-    let subject = companyType === 'fletera' ? `Propuesta de Alianza Comercial - GP Logistics` : `Soluciones en Transporte - GP Logistics`;
+    let subject = companyType === 'fletera' 
+      ? `Propuesta de Alianza Comercial - GP Logistics` 
+      : (companyType === 'cliente_followup' ? `Re: Fletes y unidades disponibles para ${companyName}` : `Unidades de respaldo y cotización de fletes - ${companyName}`);
+    
     if (subRes.ok) {
       const subData = await subRes.json();
       const generated = subData.choices?.[0]?.message?.content?.trim();
       if (generated && generated.length > 3) subject = generated.replace(/^["']|["']$/g, '');
     }
 
-    // 2. Send Email with Nodemailer (Using Gmail as default setup)
+    // 2. Send Email with Nodemailer
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // Standard for Gmail. If Zoho, change to host: 'smtp.zoho.com', port: 465, secure: true
+      service: 'gmail',
       auth: {
         user: smtpUser,
         pass: smtpPass,
       }
     });
 
-    // Replace line breaks with <br> for HTML email
     const htmlBody = emailBody.replace(/\n/g, '<br>');
 
     await transporter.sendMail({

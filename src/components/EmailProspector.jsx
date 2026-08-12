@@ -29,6 +29,7 @@ export default function EmailProspector() {
 
   const fleteraInputRef = React.useRef(null);
   const clienteInputRef = React.useRef(null);
+  const followupInputRef = React.useRef(null);
 
   const timerRef = useRef(null);
 
@@ -239,6 +240,10 @@ export default function EmailProspector() {
               <Building2 size={14} /> Subir Clientes
               <input ref={clienteInputRef} type="file" accept=".xlsx, .xls, .csv" onChange={(e) => handleExcelUpload(e, 'cliente')} style={{ display: 'none' }} />
             </label>
+            <label className="btn btn-ghost" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#60a5fa' }}>
+              <RefreshCw size={14} /> Subir Seguimiento
+              <input ref={followupInputRef} type="file" accept=".xlsx, .xls, .csv" onChange={(e) => handleExcelUpload(e, 'cliente_followup')} style={{ display: 'none' }} />
+            </label>
             {campaignQueue.length > 0 && (
               <button 
                 className={`btn ${isCampaignRunning ? 'btn-danger' : 'btn-primary'}`} 
@@ -321,12 +326,15 @@ export default function EmailProspector() {
           <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             <div>
               <label className="form-label">Tipo de empresa</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button type="button" className={`btn ${companyType === 'fletera' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCompanyType('fletera')} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-                  <Truck size={14} /> Fletera (Proveedor)
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button type="button" className={`btn ${companyType === 'fletera' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCompanyType('fletera')} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.75rem' }}>
+                  <Truck size={14} /> Fletera
                 </button>
-                <button type="button" className={`btn ${companyType === 'cliente' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCompanyType('cliente')} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-                  <Building2 size={14} /> Cliente (Fábrica)
+                <button type="button" className={`btn ${companyType === 'cliente' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCompanyType('cliente')} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.75rem' }}>
+                  <Building2 size={14} /> Cliente
+                </button>
+                <button type="button" className={`btn ${companyType === 'cliente_followup' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCompanyType('cliente_followup')} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.75rem' }}>
+                  <RefreshCw size={14} /> Seguimiento
                 </button>
               </div>
             </div>

@@ -15,7 +15,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Falta la API Key en el servidor.' });
     }
 
-    // Determinar el tipo de correo a generar
     let prompt = '';
 
     if (companyType === 'fletera') {
@@ -33,7 +32,6 @@ CONTEXTO DE QUIÉN ENVÍA:
 - Correo: contacto@grupoponcelogistics.com
 - Somos una agencia integradora de servicios logísticos con base en el norte de México (Coahuila/Nuevo León).
 - Estamos buscando alianzas con líneas de transporte para asignarles volúmenes de carga de nuestros clientes.
-- Contamos con plataforma digital de gestión logística con rastreo GPS y cotizador automático.
 
 OBJETIVO DEL CORREO:
 - Proponerles una alianza comercial donde GP Logistics les asigne cargas/viajes de nuestros clientes.
@@ -43,46 +41,68 @@ REGLAS OBLIGATORIAS:
 - NUNCA propongas llamadas telefónicas, sesiones, videollamadas, reuniones presenciales ni agendar citas.
 - Toda comunicación debe ser por CORREO ELECTRÓNICO únicamente.
 - En lugar de "agendemos una llamada" usa frases como: "quedo al pendiente de su respuesta por este medio" o "le agradezco me comparta la información vía correo".
-- NO uses palabras como "intermediario" o "comisionista", usa "agencia integradora" o "brazo comercial".
 
 INSTRUCCIONES DE FORMATO:
 - Genera SOLO el cuerpo del correo (sin "Asunto:" ni etiquetas).
-- Tono: Muy profesional, corporativo, confiable. Que suene como una empresa grande.
-- Largo: 3-4 párrafos máximo. Conciso pero contundente.
+- Tono: Muy profesional, corporativo, confiable.
+- Largo: 3 párrafos máximo.
 - Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://ponces-logistics.com/`;
-    } else {
-      prompt = `Genera un correo electrónico profesional de ventas B2B en español para enviar a una empresa manufacturera o comercial que podría necesitar servicios de transporte de carga.
+    } else if (companyType === 'cliente_followup') {
+      prompt = `Genera un correo de SEGUIMIENTO (Follow-up) corto y muy cortés de ventas B2B en español para un cliente potencial manufacturero o comercial.
 
 DATOS:
 - Empresa destino: ${companyName}
-- Contacto: ${contactName || 'Gerente de Logística/Tráfico'}
-- Notas adicionales: ${notes || 'Ninguna'}
+- Contacto: ${contactName || 'Gerente de Logística'}
+
+CONTEXTO:
+- Empresa: GP Logistics
+- Director Comercial: Christopher Ponce Rivera
+- Web: https://ponces-logistics.com/
+
+OBJETIVO DEL SEGUIMIENTO:
+- Breve recordatorio de 2 párrafos máximo.
+- Preguntar si tienen alguna ruta activa esta semana saliendo de Monterrey, Saltillo, Ramos Arizpe, Guadalajara, CDMX o Laredo donde requieran unidades de respaldo (caja seca 40/53', plataformas) o quieran comparar tarifas con su flete actual.
+- Cierre sin fricción: "¿Les serviría que les enviemos una cotización comparativa sin compromiso por este medio?"
+
+REGLAS OBLIGATORIAS:
+- NUNCA propongas llamadas telefónicas, sesiones, videollamadas ni citas presenciales.
+- Toda comunicación por correo electrónico únicamente.
+
+INSTRUCCIONES DE FORMATO:
+- Genera SOLO el cuerpo del correo.
+- Tono: Muy amable, directo, breve (máximo 2 párrafos).
+- Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://ponces-logistics.com/`;
+    } else {
+      // CLIENTE PRIMER CONTACTO - ALTO GANCHO DE CONVERSIÓN
+      prompt = `Genera un correo de ventas B2B de ALTO GANCHO DE CONVERSIÓN en español para enviar a un Gerente de Logística/Tráfico/Compras de una empresa manufacturera o comercial.
+
+DATOS:
+- Empresa destino: ${companyName}
+- Contacto: ${contactName || 'Gerente de Logística/Tráfico/Compras'}
+- Giro/Notas: ${notes || 'Sector industrial'}
 
 CONTEXTO DE QUIÉN ENVÍA:
 - Empresa: GP Logistics (Grupo Ponce Logistics)
 - Director Comercial: Christopher Ponce Rivera
 - Web: https://ponces-logistics.com/
-- Correo: contacto@grupoponcelogistics.com
-- Somos una agencia integradora de servicios logísticos con base en el norte de México.
-- Ofrecemos transporte terrestre con rastreo satelital en tiempo real, cotizador automático con IA, y red de transportistas verificados.
-- Tipos de unidad: Cajas secas 48/53 pies, plataformas, rabones, camionetas 3.5 ton.
-- Rutas: Monterrey, Saltillo, Ramos Arizpe, Laredo, Querétaro, CDMX, Guadalajara y todo México.
 
-OBJETIVO DEL CORREO:
-- Presentar GP Logistics como proveedor de servicios de transporte terrestre.
-- Destacar nuestra tecnología (plataforma digital, rastreo GPS, cotizador con IA).
-- Ofrecer una cotización sin compromiso para sus próximos embarques.
+GANCHO Y PROPUESTA DE VALOR:
+- Atacar directamente el problema de disponibilidad de camiones y tarifas altas en rutas críticas.
+- Ofrecer solución: Unidades de respaldo con asignación garantizada (cajas secas 40 y 53', plataformas, rabones) con rastreo GPS en tiempo real en los corredores Monterrey, Saltillo, Ramos Arizpe, Laredo, CDMX y Guadalajara.
+- Garantizar cotización comparativa en menos de 15 minutos sin ningún compromiso.
+
+PREGUNTA DE CIERRE SIN FRICCIÓN:
+- Finaliza con la pregunta: "¿Tendrán alguna carga o ruta activa esta semana donde requieran una unidad de respaldo o les sirva recibir una cotización comparativa sin compromiso?"
 
 REGLAS OBLIGATORIAS:
-- NUNCA propongas llamadas telefónicas, sesiones, videollamadas, reuniones presenciales ni agendar citas.
+- NUNCA propongas llamadas telefónicas, sesiones, videollamadas ni agendar citas.
 - Toda comunicación debe ser por CORREO ELECTRÓNICO únicamente.
-- En lugar de "agendemos una llamada" usa frases como: "quedo al pendiente de su respuesta por este medio" o "con gusto le enviamos una cotización por correo".
+- En lugar de "agendemos una llamada" usa siempre "quedo al pendiente de su respuesta por este medio".
 
 INSTRUCCIONES DE FORMATO:
-- Genera SOLO el cuerpo del correo (sin "Asunto:" ni etiquetas).
-- Tono: Profesional, moderno, tecnológico. Que suene innovador y confiable.
-- Largo: 3-4 párrafos máximo. Conciso pero contundente.
-- Menciona al menos 1 ventaja competitiva única (rastreo GPS en tiempo real, cotizador automático).
+- Genera SOLO el cuerpo del correo (sin etiquetas de asunto dentro del texto).
+- Tono: Profesional, directo al grano, enfocado en solucionar problemas de transporte.
+- Largo: Máximo 2 a 3 párrafos cortos (menos de 120 palabras).
 - Termina con la firma: Christopher Ponce Rivera | Dirección Comercial | GP Logistics | https://ponces-logistics.com/`;
     }
 
@@ -98,8 +118,8 @@ INSTRUCCIONES DE FORMATO:
           { role: 'system', content: 'Eres un experto en redacción de correos corporativos de ventas B2B para empresas de logística en México. Escribes correos persuasivos, profesionales y concisos que generan respuestas.' },
           { role: 'user', content: prompt },
         ],
-        temperature: 0.7,
-        max_tokens: 800,
+        temperature: 0.6,
+        max_tokens: 600,
       }),
     });
 
@@ -112,10 +132,12 @@ INSTRUCCIONES DE FORMATO:
     const data = await response.json();
     const emailBody = data.choices?.[0]?.message?.content || '';
 
-    // Generar un asunto inteligente
-    const subjectPrompt = companyType === 'fletera'
-      ? `Genera UN SOLO asunto de correo profesional (máximo 10 palabras) para proponer una alianza de transporte a "${companyName}". Solo el texto del asunto, sin comillas ni etiquetas.`
-      : `Genera UN SOLO asunto de correo profesional (máximo 10 palabras) para ofrecer servicios de transporte de carga a "${companyName}". Solo el texto del asunto, sin comillas ni etiquetas.`;
+    let subjectPrompt = `Genera UN SOLO asunto de correo corto (máximo 8 palabras) enfocado en resolver fallas de flete a "${companyName}". Solo el texto del asunto, sin comillas ni etiquetas.`;
+    if (companyType === 'fletera') {
+      subjectPrompt = `Genera UN SOLO asunto de correo profesional (máximo 8 palabras) para proponer una alianza de transporte a "${companyName}". Solo el texto.`;
+    } else if (companyType === 'cliente_followup') {
+      subjectPrompt = `Genera UN SOLO asunto de seguimiento corto tipo "Re: Fletes y unidades disponibles para ${companyName}". Solo el texto.`;
+    }
 
     const subjectResponse = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
       method: 'POST',
@@ -136,7 +158,7 @@ INSTRUCCIONES DE FORMATO:
 
     let subject = companyType === 'fletera'
       ? `Propuesta de Alianza Comercial - GP Logistics`
-      : `Soluciones en Transporte de Carga - GP Logistics`;
+      : (companyType === 'cliente_followup' ? `Re: Fletes y unidades disponibles para ${companyName}` : `Unidades de respaldo y cotización de fletes - ${companyName}`);
 
     if (subjectResponse.ok) {
       const subjectData = await subjectResponse.json();
