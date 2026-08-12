@@ -139,12 +139,16 @@ export default function EmailProspector() {
           let rawEmail = String(mail).split('/')[0].trim();
 
           if (name && rawEmail && rawEmail.includes('@') && !rawEmail.includes('contacto via')) {
+            const giro = findCol(row, 'giro', 'sector', 'industria', 'tipo de carga');
+            const ruta = findCol(row, 'ruta principal', 'ruta');
+            const notesCombined = [giro, ruta ? `Ruta: ${ruta}` : ''].filter(Boolean).join(' | ');
+
             newQueue.push({
               companyName: name,
               contactName: findCol(row, 'contacto', 'contact'),
               email: rawEmail,
               companyType: uploadType,
-              notes: findCol(row, 'tipo de equipo', 'tipo de carga', 'sector', 'industria', 'servicio', 'notas'),
+              notes: notesCombined || findCol(row, 'servicio', 'notas'),
             });
           }
         });
