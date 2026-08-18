@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Send, Copy, Check, Building2, Truck, RefreshCw, Mail, User, FileText, Upload, Play, Pause, Trash2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import posthog from 'posthog-js';
 
 export default function EmailProspector() {
   // Manual Generation State
@@ -97,6 +98,7 @@ export default function EmailProspector() {
   const toggleCampaign = () => {
     if (!isCampaignRunning && timeUntilNext === 0) {
       setTimeUntilNext(1); // Arrancar casi inmediatamente el primero
+      posthog.capture('campaign_started', { queue_size: campaignQueue.length });
     }
     setIsCampaignRunning(!isCampaignRunning);
   };
@@ -155,6 +157,7 @@ export default function EmailProspector() {
 
         setCampaignQueue(prev => [...prev, ...newQueue]);
         addLog(`📂 Cargados ${newQueue.length} ${uploadType === 'fletera' ? 'fleteras' : 'clientes'} desde Excel.`, 'info');
+        posthog.capture('campaign_excel_uploaded', { company_type: uploadType, contact_count: newQueue.length });
       } catch (err) {
         alert('Error al leer el Excel. Verifica el formato.');
       }
@@ -184,6 +187,7 @@ export default function EmailProspector() {
       if (!res.ok) throw new Error(data.error || 'Error al generar');
       setGeneratedSubject(data.subject || '');
       setGeneratedBody(data.body || '');
+      posthog.capture('email_generated', { company_type: companyType });
     } catch (err) {
       setError('Error al generar el correo: ' + err.message);
     } finally {
@@ -213,6 +217,7 @@ export default function EmailProspector() {
     const body = encodeURIComponent(generatedBody);
     window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
     setHistory(prev => [{ company: companyName, email, type: companyType, date: new Date().toLocaleString('es-MX'), subject: generatedSubject }, ...prev]);
+    posthog.capture('email_sent_via_gmail', { company_type: companyType });
   };
 
   const formatTime = (sec) => {
